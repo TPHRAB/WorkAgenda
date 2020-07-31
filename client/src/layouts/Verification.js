@@ -12,7 +12,12 @@ import '../assets/css/verification.css'
 
 export default function Login() {
         const { register, handleSubmit } = useForm();
-        const onSubmit = data => console.log(data);
+        const onSubmit = data => {
+            let params = new FormData();
+            params.append('username', data.username);
+            params.append('password', data.password);
+            fetch('http://localhost:3001/login', {method: 'POST', body: params})
+        };
         return (
             <div id="login-form">
                 <div id="card">
