@@ -1,9 +1,8 @@
 CREATE TABLE users (
-    id int AUTO_INCREMENT,
     username varchar(255),
-    password varchar(32), -- AES-256 cipher text length
+    password varchar(16), -- AES-512 cipher text length
     salt int,
-    PRIMARY KEY (id)
+    PRIMARY KEY (username)
 );
 CREATE TABLE messages (
 );
