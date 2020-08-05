@@ -39,3 +39,8 @@
     - send time
 - settings
     - id (foeign key from user)
+
+
+---
+# Tomorrow
+- set up jwt token attacher

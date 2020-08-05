@@ -1,6 +1,9 @@
 const express = require('express');
+const session = require('express-session');
 const multer = require('multer');
-const { register } = require('./lib/db/db');
+const { login } = require('./lib/db/user');
+const ClientError = require('./lib/errors/ClientError');
+const user = require('./lib/db/user');
 const PORT = process.env.port || 3000;
 
 // post
@@ -15,12 +18,21 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  let username = req.body.username;
-  let password = req.body.password;
-  res.json({
-    // auth: db.checkLogin(username, password) ? 'success' : 'failure'
-    hash: register()
-  });
+  try {
+    let username = req.body.username;
+    let password = req.body.password;
+    login(username, password);
+  } catch (error) {
+    if (error instanceof ClientError) {
+      res.status(401).json({
+        error: ClientError.message
+      });
+    } else {
+      res.status(500).json({
+        error: "Internal Server Error. Please try agin later."
+      });
+    }
+  }
 });
 
 app.listen(PORT);

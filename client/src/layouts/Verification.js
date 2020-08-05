@@ -16,7 +16,7 @@ export default function Login() {
             let params = new FormData();
             params.append('username', data.username);
             params.append('password', data.password);
-            fetch('http://localhost:3001/login', {method: 'POST', body: params})
+            fetch('http://localhost:3001/login', {method: 'POST', body: params});
         };
         return (
             <div id="login-form">
