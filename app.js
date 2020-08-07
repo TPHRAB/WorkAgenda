@@ -4,8 +4,7 @@ const express = require('express'),
   bodyParser = require('body-parser'),
   session = require('express-session'),
   SQLiteStore = require('connect-sqlite3')(session),
-  { login } = require('./lib/db/user'),
-  ClientError = require('./lib/errors/ClientError');
+  { login } = require('./lib/db/user');
 
 // initialize server
 const PORT = process.env.port || 3000;
@@ -26,23 +25,18 @@ app.get('/', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  try {
-    let username = req.body.username;
-    let password = req.body.password;
-    login(username, password);
-    // to do
-
-  } catch (error) {
-    if (error instanceof ClientError) {
-      res.status(401).json({
-        error: ClientError.message
-      });
-    } else {
+  let username = req.body.username;
+  let password = req.body.password;
+  login(username, password).catch((error) => {
+    if (error instanceof Error) {
       res.status(500).json({
         error: "Internal Server Error. Please try agin later."
       });
+    } else {
+      // Promise been rejected
+      res.status(401).json({ error });
     }
-  }
+  });
 });
 
 app.listen(PORT);
