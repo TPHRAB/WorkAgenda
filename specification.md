@@ -28,19 +28,21 @@
 
 ## Tables
 - users
-    - id (primary key)
-    - username
-    - password (hash)
-    - salt
+  - id (primary key)
+  - username
+  - password (hash)
+  - salt
 - messages
-    - id (foreign key from user)
-    - receiver_id (foreign key from users)
-    - message
-    - send time
+  - id (foreign key from user)
+  - receiver_id (foreign key from users)
+  - message
+  - send time
 - settings
-    - id (foeign key from user)
+  - id (foeign key from user)
+- sessions
+  - managed by session store
 
 
 ---
-# Tomorrow
-- set up jwt token attacher
+# Learnings
+- Session has to be set before `res.send()` becasue `res.send()` triggers `Sqlite3Store.set()`
