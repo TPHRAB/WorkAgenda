@@ -6,20 +6,27 @@ import Login from '../views/Login'
 // css
 import '../assets/css/verification.css';
 
-export default function Verification() {
-        const { register, handleSubmit } = useForm();
-        const onSubmit = data => {
-            let params = new FormData();
-            params.append('username', data.username);
-            params.append('password', data.password);
-            fetch('/login', {method: 'POST', body: params, credentials: 'include'});
-        };
-        return (
-            <div id="login-form">
-                <div id="card">
-                    <h3 id="title"><strong>Sign-In</strong></h3>
-                    <Login />
-                </div>
+export default class Verification extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      message: null
+    }
+  }
+
+  setMessage = (message) => {
+    this.setState({ message });
+  }
+    
+
+  render() {
+    return (
+        <div id="verification">
+            <div id="card">
+                <Login setMessage={this.setMessage}/>
+                <div id="message">{this.state.message}</div>
             </div>
-        );
+        </div>
+    );
+  }
 }

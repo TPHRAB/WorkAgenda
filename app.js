@@ -25,26 +25,28 @@ app.use(session({
   secret: 'your secret',
   cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 }, // 1 week
 }));
+const API_URL = '/api';
 
-app.post('/login', async (req, res) => {
+app.post(API_URL + '/login', async (req, res) => {
   let username = req.body.username;
   let password = req.body.password;
   try {
-    if (req.session.username) {
-      await Promise.reject(`Already loggged in as ${username}`);
+    if (!req.session.username) {
+      // if not logged in
+      await login(username, password);
+      req.session.username = username;
     }
-    await login(username, password);
-    // if no error caught
-    req.session.username = username;
-    res.json({
-      loggedIn: true
-    });
+    if (req.session.username) {
+      res.json({
+        loggedIn: true
+      });
+    }
   } catch (error) {
     handleError(error, res);
   }
 });
 
-app.post('/register', async (req, res) => {
+app.post(API_URL + '/register', async (req, res) => {
   let username = req.body.username;
   let password = req.body.password;
   try {
@@ -58,7 +60,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.post('/logout', (req, res) => {
+app.post(API_URL + '/logout', (req, res) => {
   try {
     req.session.destroy();
     res.json({
