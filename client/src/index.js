@@ -34,8 +34,8 @@ ReactDOM.render(
   <Router history={hist}>
     <Switch>
       <Route path="/admin" component={Admin} />
-      <Route path="/login" component={Verification} />
-      <Redirect from="/" to="/login" />
+      <Route path="/verification" component={Verification} />
+      <Redirect from="/" to="/verification" />
     </Switch>
   </Router>,
   document.getElementById("root")

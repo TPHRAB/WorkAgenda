@@ -26,7 +26,18 @@
 //     component: DashboardPage,
 //     layout: "/admin"
 //   }
+
+import Login from 'views/Login'
+
 const dashboardRoutes = [
 ];
 
-export default dashboardRoutes;
+const verificationRoutes = [
+  {
+    path: "/login",
+    component: Login,
+    layout: "/verification"
+  }
+]
+
+export {dashboardRoutes, verificationRoutes};

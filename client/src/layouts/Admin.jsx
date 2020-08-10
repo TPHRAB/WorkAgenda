@@ -10,7 +10,7 @@ import Navbar from "components/Navbars/Navbar.js";
 import Footer from "components/Footer/Footer.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
 
-import routes from "routes.js";
+import { dashboardRoutes } from "routes.js";
 
 import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
 
@@ -21,7 +21,7 @@ let ps;
 
 const switchRoutes = (
   <Switch>
-    {routes.map((prop, key) => {
+    {dashboardRoutes.map((prop, key) => {
       if (prop.layout === "/admin") {
         return (
           <Route
@@ -94,7 +94,7 @@ export default function Admin({ ...rest }) {
   return (
     <div className={classes.wrapper}>
       <Sidebar
-        routes={routes}
+        routes={dashboardRoutes}
         logoText={"Creative Tim"}
         logo={logo}
         image={image}
@@ -105,7 +105,7 @@ export default function Admin({ ...rest }) {
       />
       <div className={classes.mainPanel} ref={mainPanel}>
         <Navbar
-          routes={routes}
+          routes={dashboardRoutes}
           handleDrawerToggle={handleDrawerToggle}
           {...rest}
         />
