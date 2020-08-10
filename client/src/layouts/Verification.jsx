@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import SnackbarContent from "components/Snackbar/SnackbarContent.js";
 import Login from '../views/Login'
 
 
@@ -17,15 +17,27 @@ export default class Verification extends React.Component {
   setMessage = (message) => {
     this.setState({ message });
   }
-    
 
   render() {
+    let message;
+    if (this.state.message) {
+      message = <SnackbarContent
+                  message={this.state.message} 
+                  close
+                  color="danger" 
+                  onClick={() => {
+                    this.setState({ message: null })}
+                  }
+                />
+    }
     return (
-        <div id="verification">
+        <div id="background">
+          <div id="mask">
             <div id="card">
                 <Login setMessage={this.setMessage}/>
-                <div id="message">{this.state.message}</div>
+                {message}
             </div>
+          </div>
         </div>
     );
   }

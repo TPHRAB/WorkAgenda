@@ -1,19 +1,25 @@
-#verification {
+#background {
+  background-image: url('https://wired.jp/wp-content/uploads/2019/01/Comparison-City-MAIN-ART-1024x768.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+#mask {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 85vh;
+  min-height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
 }
 
 #card {
   padding-left: 1em;
   padding-right: 1em;
+  margin-bottom: 10%;
   width: 20vw;
   background-color: white;
   border-radius: 2%;
   text-align: center;
-  border-style: solid;
-  border-color: grey;
 }
 
 #login-button {

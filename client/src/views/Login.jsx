@@ -49,7 +49,8 @@ function Login(props) {
                   }}
                   inputProps={{
                       name: "password",
-                      inputRef: register
+                      inputRef: register,
+                      type: "password"
                   }}
               />
           </GridItem>
