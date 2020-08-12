@@ -1,3 +1,5 @@
+const user = require('./lib/db/user');
+
 // imports
 const express = require('express'),
   cookieParser = require('cookie-parser'),
@@ -28,9 +30,9 @@ app.use(session({
 const API_URL = '/api';
 
 app.post(API_URL + '/login', async (req, res) => {
+  let username = req.body.username;
+  let password = req.body.password;
   try {
-    let username = req.body.username;
-    let password = req.body.password;
     if (req.session.username && req.session.username != username) {
       // if already logged in
       await Promise.reject(`Already logged in as ${req.session.username}`);
@@ -50,9 +52,12 @@ app.post(API_URL + '/login', async (req, res) => {
 app.post(API_URL + '/register', async (req, res) => {
   let username = req.body.username;
   let password = req.body.password;
+  let firstName = req.body.firstName;
+  let lastName = req.body.lastName;
   try {
-    await register(username, password);
+    await register(username, password, firstName, lastName);
     // if no error
+    req.session.username = username;
     res.json({
       registered: true
     });

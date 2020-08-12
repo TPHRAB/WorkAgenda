@@ -12,6 +12,22 @@ function Register(props) {
   const { register, handleSubmit } = useForm();
 
   const onSubmit = async (data) => {
+    if (!data.username || !data.password || !data.firstName || !data.lastName) {
+      props.setMessage('Please fill in all the fields');
+    } else {
+      let params = new FormData();
+      params.append('username', data.username);
+      params.append('password', data.password);
+      params.append('firstName', data.firstName);
+      params.append('lastName', data.lastName);
+      let result = await fetch('/api/register', {method: 'POST', body: params});
+      if (result.ok) {
+        props.history.push('/admin');
+      } else {
+        result = await result.json();
+        props.setMessage(result.error);
+      }
+    }
   };
 
   return (
@@ -26,7 +42,7 @@ function Register(props) {
                 fullWidth: true
               }}
               inputProps={{
-                  name: "firstname",
+                  name: "firstName",
                   inputRef: register
               }}
             />
@@ -38,7 +54,7 @@ function Register(props) {
                 fullWidth: true
               }}
               inputProps={{
-                name: "lastname",
+                name: "lastName",
                 inputRef: register
               }}
             />

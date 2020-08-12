@@ -59,7 +59,7 @@ function Login(props) {
           </GridItem>
           <Button color="primary" type="submit" id="submit-button">Continue</Button>
           <span id="register-prompt">
-            Don't have an account? <a href="/verification/register">Register one</a>
+            Doesn't have an account? <a href="/verification/register">Register one</a>
           </span>
       </Grid>
     </form>
