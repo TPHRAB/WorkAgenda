@@ -1,5 +1,4 @@
 import React from 'react';
-import { withRouter } from "react-router";
 
 // @material-ui/core components
 import Grid from "@material-ui/core/Grid";
@@ -12,7 +11,10 @@ import { useForm } from 'react-hook-form';
 function Login(props) {
   const { register, handleSubmit } = useForm();
 
-  const onSubmit = async data => {
+  const onSubmit = async (data) => {
+    if (!data.username || !data.password) {
+      props.setMessage('Username and password cannot be empty');
+    } else {
       let params = new FormData();
       params.append('username', data.username);
       params.append('password', data.password);
@@ -23,6 +25,7 @@ function Login(props) {
         result = await result.json();
         props.setMessage(result.error);
       }
+    }
   };
 
   return (
@@ -54,10 +57,13 @@ function Login(props) {
                   }}
               />
           </GridItem>
-          <Button color="primary" type="submit" id="login-button">Continue</Button>
+          <Button color="primary" type="submit" id="submit-button">Continue</Button>
+          <span id="register-prompt">
+            Don't have an account? <a href="/verification/register">Register one</a>
+          </span>
       </Grid>
     </form>
   )
 }
 
-export default withRouter(Login);
+export default Login;

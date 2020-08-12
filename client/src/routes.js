@@ -27,7 +27,8 @@
 //     layout: "/admin"
 //   }
 
-import Login from 'views/Login'
+import Login from 'views/verification/Login';
+import Register from 'views/verification/Register';
 
 const dashboardRoutes = [
 ];
@@ -36,6 +37,11 @@ const verificationRoutes = [
   {
     path: "/login",
     component: Login,
+    layout: "/verification"
+  },
+  {
+    path: "/register",
+    component: Register,
     layout: "/verification"
   }
 ]
