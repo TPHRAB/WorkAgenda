@@ -22,6 +22,8 @@ app.use(session({
   }),
   secret: 'your secret',
   cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 }, // 1 week
+  resave: false,
+  saveUninitialized: false,
 }));
 const API_URL = '/api';
 
@@ -29,7 +31,7 @@ app.post(API_URL + '/login', async (req, res) => {
   try {
     let username = req.body.username;
     let password = req.body.password;
-    if (req.session.username != username) {
+    if (req.session.username && req.session.username != username) {
       // if already logged in
       await Promise.reject(`Already logged in as ${req.session.username}`);
     }
