@@ -1,0 +1,15 @@
+{
+    "env": {
+        "node": true,
+        "commonjs": true,
+        "es2020": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": 11
+    },
+    "rules": {
+      "semi": [2, "always"],
+      "no-trailing-spaces": [2, { "skipBlankLines": true }]
+    }
+}
