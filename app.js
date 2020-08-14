@@ -1,5 +1,3 @@
-const user = require('./lib/db/user');
-
 // imports
 const express = require('express'),
   cookieParser = require('cookie-parser'),
@@ -66,12 +64,23 @@ app.post(API_URL + '/register', async (req, res) => {
   }
 });
 
-app.post(API_URL + '/logout', (req, res) => {
+app.get(API_URL + '/logout', async (req, res) => {
   try {
+    if (!req.session.username) {
+      await Promise.reject('Never logged in as a username');
+    }
     req.session.destroy();
-    res.json({
-      loggedOut: true
-    });
+    res.end();
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+app.get(API_URL + '/isLoggedIn', async (req, res) => {
+  try {
+    await checkLoggedin(req);
+    // if no rejected Promise or error
+    res.end();
   } catch (error) {
     handleError(error, res);
   }
@@ -88,5 +97,12 @@ function handleError(error, res) {
     res.status(401).json({ error });
   }
 }
+
+async function checkLoggedin(req) {
+  if (!req.session.username) {
+    await Promise.reject('Permission denied');
+  }
+}
+
 
 app.listen(PORT);

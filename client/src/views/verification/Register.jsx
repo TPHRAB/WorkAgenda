@@ -8,7 +8,7 @@ import Button from "components/CustomButtons/Button.js";
 
 import { useForm } from 'react-hook-form';
 
-function Register(props) {
+export default function Register(props) {
   const { register, handleSubmit } = useForm();
 
   const onSubmit = async (data) => {
@@ -90,5 +90,3 @@ function Register(props) {
     </form>
   )
 }
-
-export default Register;

@@ -23,6 +23,7 @@ import { Router, Route, Switch, Redirect } from "react-router-dom";
 // core components
 import Admin from "layouts/Admin.jsx";
 import Verification from "layouts/Verification.jsx";
+import Protector from "./utils/Protector";
 
 import "assets/css/material-dashboard-react.css?v=1.9.0";
 
@@ -33,7 +34,9 @@ const hist = createBrowserHistory();
 ReactDOM.render(
   <Router history={hist}>
     <Switch>
-      <Route path="/admin" component={Admin} />
+      <Route path="/admin" render={() => {
+        return <Protector component={Admin} />
+      }} />
       <Route path="/verification" component={Verification} />
       <Redirect from="/" to="/verification" />
     </Switch>

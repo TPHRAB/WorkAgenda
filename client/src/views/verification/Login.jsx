@@ -8,7 +8,7 @@ import Button from "components/CustomButtons/Button.js";
 
 import { useForm } from 'react-hook-form';
 
-function Login(props) {
+export default function Login(props) {
   const { register, handleSubmit } = useForm();
 
   const onSubmit = async (data) => {
@@ -65,5 +65,3 @@ function Login(props) {
     </form>
   )
 }
-
-export default Login;
