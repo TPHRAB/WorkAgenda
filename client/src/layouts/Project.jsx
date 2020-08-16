@@ -22,7 +22,7 @@ let ps;
 const switchRoutes = (
   <Switch>
     {dashboardRoutes.map((prop, key) => {
-      if (prop.layout === "/admin") {
+      if (prop.layout === "/project") {
         return (
           <Route
             path={prop.layout + prop.path}
@@ -39,7 +39,7 @@ const switchRoutes = (
 
 const useStyles = makeStyles(styles);
 
-export default function Admin({ ...rest }) {
+export default function Project({ ...rest }) {
   // styles
   const classes = useStyles();
   // ref to help us initialize PerfectScrollbar on windows devices

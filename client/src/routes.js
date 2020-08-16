@@ -27,10 +27,28 @@
 //     layout: "/admin"
 //   }
 
-import Login from 'views/verification/Login';
-import Register from 'views/verification/Register';
+import Login from 'views/Verification/Login';
+import Register from 'views/Verification/Register';
+import BugReport from 'views/BugReport/BugReport'
+import BugReportIcon from '@material-ui/icons/BugReport';
+import DashboardIcon from '@material-ui/icons/Dashboard';
+import Dashboard from 'views/Dashboard/Dashboard';
 
 const dashboardRoutes = [
+  {
+    path: '/dashbord',
+    name: 'Dashboard',
+    icon: DashboardIcon,
+    component: Dashboard,
+    layout: '/project'
+  },
+  {
+    path: "/bugreport",
+    name: "Bug Report",
+    icon: BugReportIcon,
+    component: BugReport,
+    layout: "/project"
+  }
 ];
 
 const verificationRoutes = [

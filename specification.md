@@ -46,3 +46,8 @@
 ---
 # Learnings
 - Session has to be set before `res.send()` becasue `res.send()` triggers `Sqlite3Store.set()`
+
+---
+# Issue
+
+- Tweak components/Table/Table.js to fit BugReport

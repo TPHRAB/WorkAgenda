@@ -21,6 +21,8 @@
   },
   "homepage": "https://github.com/TPHRAB/WorkAgenda#readme",
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^21.0.0",
+    "@ckeditor/ckeditor5-react": "^2.1.0",
     "body-parser": "^1.19.0",
     "concurrently": "^5.2.0",
     "connect-sqlite3": "^0.9.11",
