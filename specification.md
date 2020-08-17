@@ -28,10 +28,10 @@
 
 ## Tables
 - users
-  - id (primary key)
-  - username
+  - username (primary key)
   - password (hash)
   - salt
+  - usericon
 - messages
   - id (foreign key from user)
   - receiver_id (foreign key from users)
@@ -41,6 +41,12 @@
   - id (foeign key from user)
 - sessions
   - managed by session store
+- projects
+  - username (foreign key)
+  - project-id
+  - project name 
+  - PRIMARY KEY (username, project-id)
+  - description
 
 
 ---

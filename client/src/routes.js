@@ -36,7 +36,7 @@ import Dashboard from 'views/Dashboard/Dashboard';
 
 const dashboardRoutes = [
   {
-    path: '/dashbord',
+    path: '/dashboard',
     name: 'Dashboard',
     icon: DashboardIcon,
     component: Dashboard,

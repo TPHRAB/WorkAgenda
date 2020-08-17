@@ -9,23 +9,13 @@ import GridContainer from 'components/Grid/GridContainer';
 import GridItem from 'components/Grid/GridItem';
 import Card from 'components/Card/Card'
 import CardBody from 'components/Card/CardBody';
+import Tasks from 'components/Tasks/Tasks.js';
+import { bugs } from 'variables/general';
 // widgets
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 // css
-import 'assets/css/dashboard.css'
-
-var styles = {
-  ...dashboardStyle,
-  cardTitle: {
-    marginTop: "0",
-    minHeight: "auto",
-    fontWeight: "300",
-    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-    marginBottom: "3px",
-    textDecoration: "none"
-  }
-};
+import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
 
 const useStyles = makeStyles(styles);
 
@@ -34,32 +24,60 @@ export default function Dadhboard() {
   const [description, setDescription] = useState("Previous Description");
   const [showEditor, setEditorState] = useState(true);
   const saveDescription = () => {
-    console.log(description)
+    setEditorState(false);
   }
   return (
-    <GridContainer>
-      <GridItem xs={12} sm={12} md={12}>
-        <Card>
-          <CardHeader>
-            <h4 className={classes.cardTitle}><b>Project Description</b></h4>
-          </CardHeader>
-          <CardBody id="project-description">
-            {showEditor ? (
-              <div>
-                <CKEditor
-                  editor={ ClassicEditor }
-                  data={description}
-                  onChange={(event, editor) => setDescription(editor.getData())}
-                />
-                <Button id="editor-button" type="button" color="info" onClick={saveDescription}>Save</Button>
-                <Button id="editor-button" type="button" color="default" onClick={() => setEditorState(false)}>Cancel</Button>
-              </div>
-            ) : (
-              description
-            )}
-          </CardBody>
-        </Card>
-      </GridItem>
-    </GridContainer>
+    <div>
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={12}>
+          <Card>
+            <CardHeader color="info">
+              <h4 className={classes.cardTitleWhite}><b>Project Overview</b></h4>
+            </CardHeader>
+            <CardBody id="card-header">
+              {showEditor ? (
+                <div>
+                  <CKEditor
+                    editor={ ClassicEditor }
+                    data={description}
+                    onChange={(event, editor) => setDescription(editor.getData())}
+                  />
+                  <Button id="editor-button" type="button" color="info" onClick={saveDescription}>Save</Button>
+                  <Button id="editor-button" type="button" color="default" onClick={() => setEditorState(false)}>Cancel</Button>
+                </div>
+              ) : (
+                <div dangerouslySetInnerHTML={{ __html: description }} />
+              )}
+            </CardBody>
+          </Card>
+        </GridItem>
+      </GridContainer>
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={6}>
+          <Card>
+            <CardHeader color="danger">
+              <h4 className={classes.cardTitleWhite}><b>Overdue Work</b></h4>
+            </CardHeader>
+            <CardBody id="card-header">
+              <Tasks
+                checkedIndexes={[0,3]}
+                tasksIndexes={[0,1,2,3]}
+                tasks={bugs}
+              />
+            </CardBody>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} sm={12} md={6}>
+          <Card>
+            <CardHeader color="warning">
+              <h4 className={classes.cardTitleWhite}><b>Task Status</b></h4>
+            </CardHeader>
+            <CardBody id="card-header">
+               // some sort of graph
+            </CardBody>
+          </Card>
+        </GridItem>
+      </GridContainer>
+    </div>
   );
 }
