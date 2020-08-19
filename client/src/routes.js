@@ -33,6 +33,8 @@ import BugReport from 'views/BugReport/BugReport'
 import BugReportIcon from '@material-ui/icons/BugReport';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import Dashboard from 'views/Dashboard/Dashboard';
+import DateRangeIcon from '@material-ui/icons/DateRange';
+import Schedule from 'views/Schedule/Schedule'
 
 const dashboardRoutes = [
   {
@@ -48,7 +50,14 @@ const dashboardRoutes = [
     icon: BugReportIcon,
     component: BugReport,
     layout: "/project"
-  }
+  },
+  {
+    path: "/schedule",
+    name: "Schedule",
+    icon: DateRangeIcon,
+    component: Schedule,
+    layout: "/project"
+  },
 ];
 
 const verificationRoutes = [
