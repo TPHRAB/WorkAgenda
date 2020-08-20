@@ -35,6 +35,8 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import Dashboard from 'views/Dashboard/Dashboard';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import Schedule from 'views/Schedule/Schedule'
+import GroupIcon from '@material-ui/icons/Group';
+import Users from 'views/Users/Users';
 
 const dashboardRoutes = [
   {
@@ -56,6 +58,13 @@ const dashboardRoutes = [
     name: "Schedule",
     icon: DateRangeIcon,
     component: Schedule,
+    layout: "/project"
+  },
+  {
+    path: "/users",
+    name: "Users",
+    icon: GroupIcon,
+    component: Users,
     layout: "/project"
   },
 ];
