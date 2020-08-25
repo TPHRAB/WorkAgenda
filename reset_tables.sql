@@ -2,6 +2,9 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS sessions;
+DROP TABLE IF EXISTS projects;
+DROP TABLE IF EXISTS user_projects;
+DROP TABLE IF EXISTS bugs;
 
 CREATE TABLE users (
     username varchar(255),
@@ -19,7 +22,22 @@ CREATE TABLE sessions (
   PRIMARY KEY (sid)
 );
 
-CREATE TABLE messages (
+CREATE TABLE projects (
+  pid INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT, -- Project name
+  overview TEXT -- Project overview
 );
-CREATE TABLE settings (
+
+CREATE TABLE user_projects (
+  username varchar(255),
+  pid INT,
+  FOREIGN KEY (username) REFERENCES users,
+  FOREIGN KEY (pid) REFERENCES projects,
+  PRIMARY KEY (username, pid)
+);
+
+CREATE TABLE bugs (
+  bid INTEGER PRIMARY KEY AUTOINCREMENT,
+  pid INTEGER,
+  FOREIGN KEY (pid) REFERENCES projects
 );

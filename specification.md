@@ -42,7 +42,6 @@
 - sessions
   - managed by session store
 - projects
-  - username (foreign key)
   - project-id
   - project name 
   - PRIMARY KEY (username, project-id)

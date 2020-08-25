@@ -24,6 +24,7 @@ import { Router, Route, Switch, Redirect } from "react-router-dom";
 import Project from "layouts/Project.jsx";
 import Verification from "layouts/Verification.jsx";
 import Protector from "./utils/Protector";
+import Portal from 'layouts/Portal';
 
 import "assets/css/material-dashboard-react.css?v=1.9.0";
 
@@ -36,6 +37,9 @@ ReactDOM.render(
     <Switch>
       <Route path="/project" render={() => {
         return <Protector component={Project} />
+      }} />
+      <Route path="/portal" render={() => {
+        return <Protector component={Portal} />
       }} />
       <Route path="/verification" component={Verification} />
       <Redirect from="/" to="/project/dashboard" />

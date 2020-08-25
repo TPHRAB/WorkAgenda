@@ -37,6 +37,7 @@ import DateRangeIcon from '@material-ui/icons/DateRange';
 import Schedule from 'views/Schedule/Schedule'
 import GroupIcon from '@material-ui/icons/Group';
 import Users from 'views/Users/Users';
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 
 const dashboardRoutes = [
   {
@@ -67,6 +68,12 @@ const dashboardRoutes = [
     component: Users,
     layout: "/project"
   },
+  {
+    path: '',
+    name: 'Portal',
+    icon: ArrowBackIosIcon,
+    layout: "/portal",
+  }
 ];
 
 const verificationRoutes = [

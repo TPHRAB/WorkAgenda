@@ -31,7 +31,7 @@ export default function Sidebar(props) {
       {routes.map((prop, key) => {
         var activePro = " ";
         var listItemClasses;
-        if (prop.path === "/upgrade-to-pro") {
+        if (prop.layout === "/portal") {
           activePro = classes.activePro + " ";
           listItemClasses = classNames({
             [" " + classes[color]]: true
@@ -80,6 +80,22 @@ export default function Sidebar(props) {
       })}
     </List>
   );
+  var brand = (
+    <div className={classes.logo}>
+      <a
+        href="https://www.creative-tim.com?ref=mdr-sidebar"
+        className={classNames(classes.logoLink, {
+          [classes.logoLinkRTL]: props.rtlActive
+        })}
+        target="_blank"
+      >
+        <div className={classes.logoImage}>
+          <img src={logo} alt="logo" className={classes.img} />
+        </div>
+        {logoText}
+      </a>
+    </div>
+  );
   return (
     <div>
       <Hidden mdUp implementation="css">
@@ -97,6 +113,7 @@ export default function Sidebar(props) {
             keepMounted: true // Better open performance on mobile.
           }}
         >
+          {brand}
           <div className={classes.sidebarWrapper}>
             {props.rtlActive ? <RTLNavbarLinks /> : <AdminNavbarLinks />}
             {links}
@@ -120,6 +137,7 @@ export default function Sidebar(props) {
             })
           }}
         >
+          {brand}
           <div className={classes.sidebarWrapper}>{links}</div>
           {image !== undefined ? (
             <div
