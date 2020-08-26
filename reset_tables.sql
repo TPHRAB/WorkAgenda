@@ -25,7 +25,12 @@ CREATE TABLE sessions (
 CREATE TABLE projects (
   pid INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT, -- Project name
-  overview TEXT -- Project overview
+  owner varchar(255),
+  status varchar(6), -- ACTIVE or CLOSE
+  start_date varchar(10), -- MM-DD-YYYY
+  end_date varchar(19), -- MM-DD-YYYY hh:mm AM/PM
+  overview TEXT, -- Project overview
+  FOREIGN KEY (owner) REFERENCES users
 );
 
 CREATE TABLE user_projects (
