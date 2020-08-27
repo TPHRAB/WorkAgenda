@@ -43,6 +43,15 @@ CREATE TABLE user_projects (
 
 CREATE TABLE bugs (
   bid INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT, --bug title
+  reporter varchar(255),
+  created_date varchar(10), -- MM-DD-YYYY
+  status varchar(11), -- open/in progress/closed
+  assignee varchar(255),
+  due_date varchar(19), -- MM-DD-YYYY hh:mm AM/PM
+  severity varchar(8), -- none/critical/major/minor
   pid INTEGER,
+  FOREIGN KEY (reporter) REFERENCES users,
+  FOREIGN KEY (assignee) REFERENCES users,
   FOREIGN KEY (pid) REFERENCES projects
 );

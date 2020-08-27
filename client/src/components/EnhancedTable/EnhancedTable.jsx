@@ -102,7 +102,7 @@ function EnhancedTableHead(props) {
 }
 
 export default function EnhancedTable(props) {
-  const { headCells, rows } = props;
+  const { headCells, rows, idColumn } = props;
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
@@ -168,9 +168,8 @@ export default function EnhancedTable(props) {
           <TableBody>
             {stableSort(rows, getComparator(order, orderBy))
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row, index) => {
+              .map((row) => {
                 const isItemSelected = isSelected(row.name);
-                const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
                   <TableRow
@@ -179,11 +178,14 @@ export default function EnhancedTable(props) {
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={index}
+                    key={row[idColumn]}
                     selected={isItemSelected}
                   >
                     {
                       Object.keys(row).map((key, index) => {
+                        if (key === idColumn) {
+                          return null;
+                        }
                         return (
                           <TableCell className={classes[headCells[index].columnClass]} key={key}>
                             {
@@ -199,13 +201,6 @@ export default function EnhancedTable(props) {
                         )
                       })
                     }
-                    {/* <TableCell component="th" id={labelId} scope="row" padding="none">
-                      {row.bug}
-                    </TableCell>
-                    <TableCell align="right">{row.reporter}</TableCell>
-                    <TableCell align="right">{row.status}</TableCell>
-                    <TableCell align="right">{row.createdDate}</TableCell>
-                    <TableCell align="right">{row.dueDate}</TableCell> */}
                   </TableRow>
                 );
               })}

@@ -16,22 +16,23 @@ import { dashboardRoutes } from "routes.js";
 import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
 
 import EnhancedTable from "components/EnhancedTable/EnhancedTable";
+import { List } from "@material-ui/core";
 
 let ps;
 
 const useStyles = makeStyles(styles);
 
 const headCells = [
-  { id: 'project-name', label: 'PROJECT NAME', isLink: true },
+  { id: 'name', label: 'PROJECT NAME', isLink: true },
   { id: 'owner', label: 'OWNER' },
   { id: 'status', label: 'STATUS' },
-  { id: 'opening-bugs', label: 'BUGS' },
+  { id: 'bugs', label: 'BUGS' },
   { id: 'start-date', label: 'START DATE', date: true },
   { id: 'end date', label: 'END DATE', date: true }
 ];
 
-function createData(bug, reporter, status, openingBugs, createdDate, dueDate) {
-  return { bug, reporter, status, openingBugs, createdDate, dueDate };
+function createData(id, name, owner, status, bugs, startDate, endDate) {
+  return { id, name, owner, status, bugs, startDate, endDate };
 }
 
 const rows = [
@@ -45,6 +46,7 @@ export default function Project({ ...rest }) {
   const mainPanel = React.createRef();
   // states and functions
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [rows, setRows] = React.useState([]);
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
@@ -71,6 +73,14 @@ export default function Project({ ...rest }) {
       window.removeEventListener("resize", resizeFunction);
     };
   }, [mainPanel]);
+
+  React.useEffect(() => {
+    // fetch data from endpoint
+    fetch('/api/portal/get-projects')
+      .then(res => res.json())
+      .then(json => setRows(json));
+  }, [])
+
   return (
       <div>
         <Navbar
@@ -79,7 +89,7 @@ export default function Project({ ...rest }) {
           {...rest}
         />
         <div className={classes.content}>
-          <EnhancedTable headCells={headCells} rows={rows} />
+          <EnhancedTable headCells={headCells} rows={rows} idColumn='pid' />
         </div>
         <Footer />
       </div>

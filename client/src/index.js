@@ -42,7 +42,7 @@ ReactDOM.render(
         return <Protector component={Portal} />
       }} />
       <Route path="/verification" component={Verification} />
-      <Redirect from="/" to="/project/dashboard" />
+      <Redirect from="/" to="/portal" />
     </Switch>
   </Router>,
   document.getElementById("root")

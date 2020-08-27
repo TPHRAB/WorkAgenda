@@ -6,7 +6,8 @@ const express = require('express'),
   session = require('express-session'),
   SQLiteStore = require('connect-sqlite3')(session),
   { login, register } = require('./lib/user'),
-  { createProject, getProjects } = require('./lib/project');
+  { createProject, getProjects } = require('./lib/project'),
+  { createBug, getBugs } = require('./lib/bugs');
 
 // initialize server
 const PORT = process.env.port || 3001;
@@ -134,8 +135,10 @@ app.get(API_URL + '/isLoggedIn', async (req, res) => {
 app.get(API_URL + '/portal/get-projects', async (req, res) => {
   try {
     await checkLoggedin(req);
+
     // if logged in
     let result = await getProjects(req.session.username);
+
     res.json(result);
   } catch (error) {
     handleError(error, res);
@@ -145,6 +148,7 @@ app.get(API_URL + '/portal/get-projects', async (req, res) => {
 /**
  * usage: Create a project and set the loggedin user to be its owner
  * method: POST
+ * params: projectName, startDate, endDate, overview
  * return: 1. If success, end with status code 200.
  *         2. If failed, end with status code 401 and return JSON:
  *            {
@@ -152,13 +156,65 @@ app.get(API_URL + '/portal/get-projects', async (req, res) => {
  *            }
  */
 app.post(API_URL + '/portal/create-project', async (req, res) => {
-  const {projectName, startDate, endDate, overview} = req.body;
   try {
     await checkLoggedin(req);
+
     // if logged in
+    const {projectName, startDate, endDate, overview} = req.body;
     await createProject(req.session.username, projectName, startDate,
                   endDate, overview);
+
     res.end();
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+/**
+ * usage: Create a bug
+ * method: POST
+ * params: bugTitle, status, assignee, due_date, severity, pid
+ * return: 1. If success, end with status code 200.
+ *         2. If failed, end with status code 401 and return JSON:
+ *            {
+ *              error: 'error message'
+ *            }
+ */
+app.post(API_URL + '/project/create-bug', async (req, res) => {
+  try {
+    await checkLoggedin(req);
+
+    const {bugTitle, status, assignee, due_date, severity, pid} = req.body;
+    await createBug(req.session.username, bugTitle, status,
+                    assignee, due_date, severity, pid);
+    res.end();
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+/**
+ * usage: Get all the bugs belong to the project
+ * method: POST
+ * params: pid
+ * return: 1. If success, return JSON in format:
+ *            [
+ *              { bug, reporter, created_date, status,
+ *                assignee, due_date, severity },
+ *              ...
+ *            ]
+ *         2. If failed, end with status code 401 and return JSON:
+ *            {
+ *              error: 'error message'
+ *            }
+ */
+app.post(API_URL + '/project/get-bugs', async (req, res) => {
+  try {
+    await checkLoggedin(req);
+
+    let result = await getBugs(req.session.username, req.body.pid);
+
+    res.json(result);
   } catch (error) {
     handleError(error, res);
   }
