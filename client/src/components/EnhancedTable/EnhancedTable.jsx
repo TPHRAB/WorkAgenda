@@ -102,7 +102,7 @@ function EnhancedTableHead(props) {
 }
 
 export default function EnhancedTable(props) {
-  const { headCells, rows, idColumn } = props;
+  const { headCells, rows } = props;
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
@@ -178,25 +178,22 @@ export default function EnhancedTable(props) {
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row[idColumn]}
+                    key={row[0]}
                     selected={isItemSelected}
                   >
                     {
-                      Object.keys(row).map((key, index) => {
-                        if (key === idColumn) {
-                          return null;
-                        }
+                      headCells.map((cell) => {
                         return (
-                          <TableCell className={classes[headCells[index].columnClass]} key={key}>
-                            {
-                              headCells[index].isLink ? (
-                                <a>
-                                  {row[key]}
-                                </a>
+                          <TableCell className={classes[cell.columnClass]} key={cell.id}>
+                          {
+                              cell.isLink ? (
+                              <a>
+                                  {row[cell.id]}
+                              </a>
                               ) : (
-                                row[key]
+                              row[cell.id]
                               )
-                            }
+                          }
                           </TableCell>
                         )
                       })

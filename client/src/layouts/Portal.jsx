@@ -27,8 +27,8 @@ const headCells = [
   { id: 'owner', label: 'OWNER' },
   { id: 'status', label: 'STATUS' },
   { id: 'bugs', label: 'BUGS' },
-  { id: 'start-date', label: 'START DATE', date: true },
-  { id: 'end date', label: 'END DATE', date: true }
+  { id: 'start_date', label: 'START DATE', date: true },
+  { id: 'end_date', label: 'END DATE', date: true }
 ];
 
 function createData(id, name, owner, status, bugs, startDate, endDate) {
@@ -78,7 +78,13 @@ export default function Portal({ ...rest }) {
     // fetch data from endpoint
     fetch('/api/portal/get-projects')
       .then(res => res.json())
-      .then(json => setRows(json));
+      .then(json => {
+        json.forEach(p => {
+          p['status'] = <span style={{color: 'green'}}>{p['status']}</span>;
+          p['bugs'] = <span><span style={{color: 'red'}}>{p['bugs'][0]}</span> / <span style={{color: 'grey'}}>{p['bugs'][1]}</span></span>
+        });
+        setRows(json);
+      });
   }, [])
 
   return (
@@ -89,7 +95,7 @@ export default function Portal({ ...rest }) {
           {...rest}
         />
         <div className={classes.content}>
-          <EnhancedTable headCells={headCells} rows={rows} idColumn='pid' />
+          <EnhancedTable headCells={headCells} rows={rows} />
         </div>
         <Footer />
       </div>
