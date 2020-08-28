@@ -39,7 +39,7 @@ const rows = [
   createData('This is a bugThis is a bugThis is a bugThis is a bugThis is a bug', 'Me', <span style={{color: 'green'}}>ACTIVE</span>, <span><span style={{color: 'red'}}>3</span> / <span style={{color: 'grey'}}>1</span></span>, '08-15-2020', '08-18-2020 04:00 PM'),
 ];
 
-export default function Project({ ...rest }) {
+export default function Portal({ ...rest }) {
   // styles
   const classes = useStyles();
   // ref to help us initialize PerfectScrollbar on windows devices
@@ -82,7 +82,7 @@ export default function Project({ ...rest }) {
   }, [])
 
   return (
-      <div>
+      <div className={classes.wrapper} ref={mainPanel}>
         <Navbar
           routes={dashboardRoutes}
           handleDrawerToggle={handleDrawerToggle}
