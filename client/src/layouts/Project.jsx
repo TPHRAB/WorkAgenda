@@ -25,7 +25,7 @@ const switchRoutes = (
       if (prop.layout === "/project") {
         return (
           <Route
-            path={prop.layout + prop.path}
+            path={prop.layout + '/:pid' + prop.path}
             component={prop.component}
             key={key}
           />
@@ -33,13 +33,12 @@ const switchRoutes = (
       }
       return null;
     })}
-    <Redirect from="/project" to="/project/dashboard" />
   </Switch>
 );
 
 const useStyles = makeStyles(styles);
 
-export default function Project({ ...rest }) {
+export default function Project(props) {
   // styles
   const classes = useStyles();
   // ref to help us initialize PerfectScrollbar on windows devices
@@ -94,6 +93,7 @@ export default function Project({ ...rest }) {
   return (
     <div className={classes.wrapper}>
       <Sidebar
+        basePath={`/project/${props.match.params.pid}`}
         routes={dashboardRoutes}
         logoText={"Creative Tim"}
         logo={logo}
@@ -101,13 +101,13 @@ export default function Project({ ...rest }) {
         handleDrawerToggle={handleDrawerToggle}
         open={mobileOpen}
         color={color}
-        {...rest}
+        {...props}
       />
       <div className={classes.mainPanel} ref={mainPanel}>
         <Navbar
           routes={dashboardRoutes}
           handleDrawerToggle={handleDrawerToggle}
-          {...rest}
+          {...props}
         />
         {/* On the /maps route we want the map to be on full screen - this is not possible if the content and conatiner classes are present because they have some paddings which would make the map smaller */}
         {getRoute() ? (

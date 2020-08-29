@@ -25,7 +25,7 @@ export default function Sidebar(props) {
   function activeRoute(routeName) {
     return window.location.href.indexOf(routeName) > -1 ? true : false;
   }
-  const { color, logo, image, logoText, routes } = props;
+  const { color, logo, image, logoText, routes, basePath } = props;
   var links = (
     <List className={classes.list}>
       {routes.map((prop, key) => {
@@ -38,15 +38,15 @@ export default function Sidebar(props) {
           });
         } else {
           listItemClasses = classNames({
-            [" " + classes[color]]: activeRoute(prop.layout + prop.path)
+            [" " + classes[color]]: activeRoute(basePath + prop.path)
           });
         }
         const whiteFontClasses = classNames({
-          [" " + classes.whiteFont]: activeRoute(prop.layout + prop.path)
+          [" " + classes.whiteFont]: activeRoute(basePath + prop.path)
         });
         return (
           <NavLink
-            to={prop.layout + prop.path}
+            to={prop.layout === '/portal' ? prop.layout + prop.path : basePath + prop.path}
             className={activePro + classes.item}
             activeClassName="active"
             key={key}

@@ -35,11 +35,11 @@ const hist = createBrowserHistory();
 ReactDOM.render(
   <Router history={hist}>
     <Switch>
-      <Route path="/project" render={() => {
-        return <Protector component={Project} />
+      <Route path="/project/:pid" render={(props) => {
+        return <Protector {...props} component={Project} />
       }} />
-      <Route path="/portal" render={() => {
-        return <Protector component={Portal} />
+      <Route path="/portal" render={(props) => {
+        return <Protector {...props} component={Portal} />
       }} />
       <Route path="/verification" component={Verification} />
       <Redirect from="/" to="/portal" />

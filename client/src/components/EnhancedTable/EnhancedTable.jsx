@@ -102,7 +102,7 @@ function EnhancedTableHead(props) {
 }
 
 export default function EnhancedTable(props) {
-  const { headCells, rows } = props;
+  const { headCells, rows, idColumn, handleClick } = props;
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
@@ -116,26 +116,6 @@ export default function EnhancedTable(props) {
     setOrderBy(property);
   };
 
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelected(newSelected);
-  };
-
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -144,8 +124,6 @@ export default function EnhancedTable(props) {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-
-  const isSelected = (name) => selected.indexOf(name) !== -1;
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
@@ -169,17 +147,13 @@ export default function EnhancedTable(props) {
             {stableSort(rows, getComparator(order, orderBy))
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row) => {
-                const isItemSelected = isSelected(row.name);
-
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => handleClick(event, row.name)}
+                    onClick={(event) => handleClick(event, row[idColumn])}
                     role="checkbox"
-                    aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row[0]}
-                    selected={isItemSelected}
+                    key={row[idColumn]}
                   >
                     {
                       headCells.map((cell) => {
@@ -191,7 +165,7 @@ export default function EnhancedTable(props) {
                                   {row[cell.id]}
                               </a>
                               ) : (
-                              row[cell.id]
+                                row[cell.id]
                               )
                           }
                           </TableCell>

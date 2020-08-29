@@ -19,13 +19,16 @@ import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js"
 
 const useStyles = makeStyles(styles);
 
-export default function Dadhboard() {
+export default function Dadhboard(props) {
   const classes = useStyles();
   const [description, setDescription] = useState("Previous Description");
   const [showEditor, setEditorState] = useState(true);
   const saveDescription = () => {
     setEditorState(false);
   }
+  React.useEffect(() => {
+    console.log(props.match.params.pid);
+  }, []);
   return (
     <div>
       <GridContainer>

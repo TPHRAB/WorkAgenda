@@ -89,4 +89,4 @@ const verificationRoutes = [
   }
 ]
 
-export {dashboardRoutes, verificationRoutes};
+export { dashboardRoutes, verificationRoutes };
