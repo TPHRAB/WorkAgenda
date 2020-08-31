@@ -13,3 +13,5 @@ create_tables.sql
 *.db
 
 .vscode/
+
+*.exe
