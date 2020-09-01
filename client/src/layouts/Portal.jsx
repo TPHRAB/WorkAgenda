@@ -93,7 +93,7 @@ export default function Portal({ history, ...rest }) {
   };
 
   return (
-      <div className={classes.wrapper} ref={mainPanel}>
+      <div ref={mainPanel}>
         <Navbar
           routes={dashboardRoutes}
           handleDrawerToggle={handleDrawerToggle}

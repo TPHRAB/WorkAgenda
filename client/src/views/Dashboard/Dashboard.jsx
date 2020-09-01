@@ -9,25 +9,68 @@ import GridItem from 'components/Grid/GridItem';
 import Card from 'components/Card/Card'
 import CardBody from 'components/Card/CardBody';
 import Tasks from 'components/Tasks/Tasks.js';
-import { bugs } from 'variables/general';
 import WorkItems from 'components/WorkItems/WorkItems'
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import BugReportIcon from '@material-ui/icons/BugReport';
 // widgets
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 // css
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
+import { bugs } from 'variables/general';
 
 const useStyles = makeStyles(styles);
+
+
+function createData(userIcon, title, type, message) {
+  if (!userIcon) {
+    userIcon = <AccountCircleIcon />;
+  }
+  type = <BugReportIcon />;
+  message = `late by ${message} days`;
+  return { userIcon, title, type, message };
+}
 
 export default function Dadhboard(props) {
   const classes = useStyles();
   const [description, setDescription] = useState("Previous Description");
-  const [showEditor, setEditorState] = useState(true);
+  const [showEditor, setEditorState] = useState(false);
+  const [overdueWork, setOverdueWork] = useState([]);
+  const [upcomingWork, setUpcomingWork] = useState([]);
+  const [notes, setNotes] = useState([]);
+
   const saveDescription = () => {
     setEditorState(false);
   }
+
+  const syncNote = () => {
+    
+  }
+
   React.useEffect(() => {
-    console.log(props.match.params.pid);
+    fetch('/api/project/dashboard?' + new URLSearchParams({ pid: props.match.params.pid }))
+      .then(res => res.json())
+      .then(json => {
+        // fill overview
+        setDescription(json.overview);
+
+        let temp = [];
+        // set overdue works
+        json.overdueWork.forEach(item => {
+          temp.push(createData(null, item.title, null, item.lateDays));
+        });
+        setOverdueWork(temp);
+
+        temp = [];
+        // set overdue works
+        json.overdueWork.forEach(item => {
+          upcomingWork.push(createData(null, item.title, null, item.lateDays));
+        });
+        setUpcomingWork(temp);
+
+        // set notes
+        setNotes(bugs);
+      });
   }, []);
   return (
     <div>
@@ -62,7 +105,7 @@ export default function Dadhboard(props) {
               <h4 className={classes.cardTitleWhite}><b>Overdue Work</b></h4>
             </CardHeader>
             <CardBody id="card-header">
-              <WorkItems />
+              <WorkItems rows={overdueWork} />
             </CardBody>
           </Card>
         </GridItem>
@@ -94,7 +137,7 @@ export default function Dadhboard(props) {
               <h4 className={classes.cardTitleWhite}><b>Upcoming Work Items</b></h4>
             </CardHeader>
             <CardBody id="card-header">
-              <WorkItems />
+              <WorkItems rows={upcomingWork} />
             </CardBody>
           </Card>
         </GridItem>
@@ -105,9 +148,8 @@ export default function Dadhboard(props) {
             </CardHeader>
             <CardBody id="card-header">
               <Tasks
-                checkedIndexes={[0,3]}
-                tasksIndexes={[0,1,2,3]}
-                tasks={bugs}
+                tasks={notes}
+                setNotes={setNotes}
               />
             </CardBody>
           </Card>

@@ -5,8 +5,8 @@ const express = require('express'),
   cors = require('cors'),
   session = require('express-session'),
   SQLiteStore = require('connect-sqlite3')(session),
-  { login, register } = require('./lib/user'),
-  { createProject, getProjects } = require('./lib/project'),
+  { login, register, updateNotes } = require('./lib/user'),
+  { createProject, getProjects, getProjectInfo } = require('./lib/project'),
   { createBug, getBugs } = require('./lib/bugs');
 
 // initialize server
@@ -173,7 +173,12 @@ app.post(API_URL + '/portal/create-project', async (req, res) => {
 /**
  * usage: Create a bug
  * method: POST
- * params: bugTitle, status, assignee, due_date, severity, pid
+ * params: bugTitle,
+ *         assignee,
+ *         due_date,
+ *         severity: 0/1/2/3 (none/minor/major/critical),
+ *                   values out of range will be considered to be 0
+ *         pid
  * return: 1. If success, end with status code 200.
  *         2. If failed, end with status code 401 and return JSON:
  *            {
@@ -184,9 +189,9 @@ app.post(API_URL + '/project/create-bug', async (req, res) => {
   try {
     await checkLoggedin(req);
 
-    const {bugTitle, status, assignee, due_date, severity, pid} = req.body;
-    await createBug(req.session.username, bugTitle, status,
-                    assignee, due_date, severity, pid);
+    const {bugTitle, assignee, dueDate, severity, pid} = req.body;
+    await createBug(req.session.username, bugTitle,
+                    assignee, dueDate, severity, pid);
     res.end();
   } catch (error) {
     handleError(error, res);
@@ -218,6 +223,73 @@ app.post(API_URL + '/project/get-bugs', async (req, res) => {
   } catch (error) {
     handleError(error, res);
   }
+});
+
+/**
+ * usage: Get all the bugs belong to the project
+ * method: POST
+ * params: pid
+ * return: 1. If success, return JSON in format:
+ *            {
+ *              overview,
+ *              overdueWork: [
+ *                {
+ *                  title,
+ *                  lateDays
+ *                },
+ *                ...
+ *              ],
+ *              upcomingWork: [
+ *                {
+ *                  title,
+ *                  daysLeft
+ *                },
+ *                ...
+ *              ],
+ *              bugStatus: [open, closed]
+ *              notes: [
+ *                some notes,
+ *                ...
+ *              ]
+ *            }
+ *         2. If failed, end with status code 401 and return JSON:
+ *            {
+ *              error: 'error message'
+ *            }
+ */
+app.get(API_URL + '/project/dashboard', async (req, res) => {
+  try {
+    await checkLoggedin(req);
+
+    let result = await getProjectInfo(req.session.username, req.query.pid);
+    res.json(result);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+/**
+ * usage: Update user's notes in project
+ * method: POST
+ * params: pid - project id,
+ *         notes - JSON list in format [note1, ...]
+ * return: 1. If success, end with status code 200
+ *         2. If failed, end with status code 401 and return JSON:
+ *            {
+ *              error: 'error message'
+ *            }
+ */
+app.post(API_URL + '/project/update-notes', async (req, res) => {
+  try {
+    await checkLoggedin(req);
+
+    const {pid, notes} = req.body;
+    await updateNotes(req.session.username, pid, notes);
+    res.end();
+  } catch (error) {
+    handleError(error, res);
+  }
+
 });
 
 function handleError(error, res) {
