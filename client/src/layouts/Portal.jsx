@@ -1,22 +1,21 @@
 import React from "react";
-import { Switch, Route, Redirect } from "react-router-dom";
 // creates a beautiful scrollbar
 import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
+import Chip from '@material-ui/core/Chip';
 // core components
 import Navbar from "components/Navbars/Navbar.js";
 import Footer from "components/Footer/Footer.js";
-import Card from "components/Card/Card";
-import CardBody from "components/Card/CardBody";
+import EnhancedTable from "components/EnhancedTable/EnhancedTable";
+import Button from "components/CustomButtons/Button.js";
+// css
+import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
 
 import { dashboardRoutes } from "routes.js";
 
-import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
 
-import EnhancedTable from "components/EnhancedTable/EnhancedTable";
-import { List } from "@material-ui/core";
 
 let ps;
 
@@ -34,11 +33,6 @@ const headCells = [
 function createData(id, name, owner, status, bugs, startDate, endDate) {
   return { id, name, owner, status, bugs, startDate, endDate };
 }
-
-const rows = [
-  createData('This is a bugThis is a bugThis is a bugThis is a bugThis is a bug', 'Me', <span style={{color: 'green'}}>ACTIVE</span>, <span><span style={{color: 'red'}}>3</span> / <span style={{color: 'grey'}}>1</span></span>, '08-15-2020', '08-18-2020 04:00 PM'),
-];
-
 
 export default function Portal({ history, ...rest }) {
   // styles
@@ -100,6 +94,19 @@ export default function Portal({ history, ...rest }) {
           {...rest}
         />
         <div className={classes.content}>
+          <div style={{display: 'flex', justifyContent: 'space-between'}}>
+            <span
+              style={{
+                fontSize: '15px',
+              }}
+            >
+              <Chip label={<b style={{ color: 'green' }}>Open: 1</b>} onClick={() => {}} variant="outlined" style={{margin: '6px 5px 0px 10px'}}/>
+              <Chip label={<b style={{ color: 'grey' }}>Closed: 0</b>} onClick={() => {}} variant="outlined" style={{margin: '6px 5px 0px 5px'}} />
+              <Chip label={<b style={{ color: '#ff9966' }}>Owned by me: 1</b>} onClick={() => {}} variant="outlined" style={{margin: '6px 5px 0px 5px'}}/>
+              
+            </span>
+            <Button type="button" color="info">New Project</Button>
+          </div>
           <EnhancedTable headCells={headCells} rows={rows} idColumn='pid' handleClick={handleClick}/>
         </div>
         <Footer />

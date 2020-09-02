@@ -76,6 +76,9 @@ const dashboardStyle = {
       fontWeight: "400",
       lineHeight: "1"
     }
+  },
+  card: {
+    minHeight: "calc(90% - 30px)"
   }
 };
 

@@ -52,6 +52,9 @@ const tasksStyle = {
     backgroundColor: "transparent",
     color: dangerColor[0],
     boxShadow: "none"
+  },
+  button: {
+    width: '100%'
   }
 };
 export default tasksStyle;

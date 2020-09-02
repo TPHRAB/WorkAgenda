@@ -9,15 +9,18 @@ import GridItem from 'components/Grid/GridItem';
 import Card from 'components/Card/Card'
 import CardBody from 'components/Card/CardBody';
 import Tasks from 'components/Tasks/Tasks.js';
+import Tooltip from "@material-ui/core/Tooltip";
+import IconButton from "@material-ui/core/IconButton";
 import WorkItems from 'components/WorkItems/WorkItems'
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import BugReportIcon from '@material-ui/icons/BugReport';
+import EditIcon from '@material-ui/icons/Edit';
 // widgets
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { Pie } from 'react-chartjs-2';
 // css
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
-import { bugs } from 'variables/general';
 
 const useStyles = makeStyles(styles);
 
@@ -33,22 +36,47 @@ function createData(userIcon, title, type, message) {
 
 export default function Dadhboard(props) {
   const classes = useStyles();
-  const [description, setDescription] = useState("Previous Description");
+  const [description, setDescription] = useState('');
   const [showEditor, setEditorState] = useState(false);
   const [overdueWork, setOverdueWork] = useState([]);
+  const [bugStatus, setBugStatus] = useState([]);
   const [upcomingWork, setUpcomingWork] = useState([]);
   const [notes, setNotes] = useState([]);
+  const pid = props.match.params.pid;
 
-  const saveDescription = () => {
-    setEditorState(false);
+  let tempOverview;
+
+  const syncNotes = (notes) => {
+    let params = new FormData();
+    params.append('pid', pid);
+    params.append('notes', JSON.stringify(notes));
+    fetch('/api/project/update-notes', { method: 'POST', body: params })
+      .then(res => {
+        if (!res.ok) props.setMessage('Cannot connect to the server');
+      })
+    setNotes(notes);
   }
 
-  const syncNote = () => {
-    
+  const syncOverview = () => {
+    setEditorState(false);
+    setDescription(tempOverview);
+    fetch('/api/project/update-project', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        pid,
+        newValues: {
+          overview: tempOverview
+        }
+      })
+    });
   }
 
   React.useEffect(() => {
-    fetch('/api/project/dashboard?' + new URLSearchParams({ pid: props.match.params.pid }))
+    fetch('/api/project/dashboard?' + new URLSearchParams({ pid }))
       .then(res => res.json())
       .then(json => {
         // fill overview
@@ -69,7 +97,10 @@ export default function Dadhboard(props) {
         setUpcomingWork(temp);
 
         // set notes
-        setNotes(bugs);
+        setNotes(json.notes);
+
+        // set bug status
+        setBugStatus(json.bugStatus);
       });
   }, []);
   return (
@@ -78,7 +109,18 @@ export default function Dadhboard(props) {
         <GridItem xs={12} sm={12} md={12}>
           <Card>
             <CardHeader color="info">
-              <h4 className={classes.cardTitleWhite}><b>Project Overview</b></h4>
+              <h4 className={classes.cardTitleWhite}>
+                <b>Project Overview</b>
+                <Tooltip
+                  title='Edit'
+                  placement="top"
+                  onClick={() => {setEditorState(true)}}
+                >
+                  <IconButton aria-label="Close">
+                    <EditIcon />
+                  </IconButton>
+                </Tooltip>
+              </h4>
             </CardHeader>
             <CardBody id="card-header">
               {showEditor ? (
@@ -86,9 +128,9 @@ export default function Dadhboard(props) {
                   <CKEditor
                     editor={ ClassicEditor }
                     data={description}
-                    onChange={(event, editor) => setDescription(editor.getData())}
+                    onChange={(event, editor) => tempOverview = editor.getData()}
                   />
-                  <Button id="editor-button" type="button" color="info" onClick={saveDescription}>Save</Button>
+                  <Button id="editor-button" type="button" color="info" onClick={syncOverview}>Save</Button>
                   <Button id="editor-button" type="button" color="default" onClick={() => setEditorState(false)}>Cancel</Button>
                 </div>
               ) : (
@@ -100,7 +142,7 @@ export default function Dadhboard(props) {
       </GridContainer>
       <GridContainer>
         <GridItem xs={12} sm={12} md={6}>
-          <Card>
+          <Card className={classes.card}>
             <CardHeader color="danger">
               <h4 className={classes.cardTitleWhite}><b>Overdue Work</b></h4>
             </CardHeader>
@@ -110,12 +152,37 @@ export default function Dadhboard(props) {
           </Card>
         </GridItem>
         <GridItem xs={12} sm={12} md={6}>
-          <Card>
+          <Card className={classes.card}>
             <CardHeader color="warning">
               <h4 className={classes.cardTitleWhite}><b>Task Status</b></h4>
             </CardHeader>
             <CardBody id="card-header">
-               // some sort of graph
+               <Pie
+                data={{
+                  labels: [
+                    'Open',
+                    'Closed',
+                  ],
+                  datasets: [{
+                    data: bugStatus,
+                    backgroundColor: [
+                      '#36A2EB',
+                      '#a3a3c2'
+                    ],
+                    hoverBackgroundColor: [
+                      '#66b3ff',
+                      '#b3b3cc'
+                    ]
+                  }]
+                }}
+                height={300}
+                options={{
+                  maintainAspectRatio: false,
+                  legend: {
+                    position: 'right'
+                  }
+                }}
+               />
             </CardBody>
           </Card>
         </GridItem>
@@ -149,6 +216,7 @@ export default function Dadhboard(props) {
             <CardBody id="card-header">
               <Tasks
                 tasks={notes}
+                syncNotes={syncNotes}
                 setNotes={setNotes}
               />
             </CardBody>

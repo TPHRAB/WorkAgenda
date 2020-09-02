@@ -5,10 +5,13 @@ import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
+import AddAlert from "@material-ui/icons/AddAlert";
 // core components
 import Navbar from "components/Navbars/Navbar.js";
 import Footer from "components/Footer/Footer.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
+import Snackbar from "components/Snackbar/Snackbar.js";
+import Button from "components/CustomButtons/Button.js";
 
 import { dashboardRoutes } from "routes.js";
 
@@ -19,22 +22,26 @@ import logo from "assets/img/reactlogo.png";
 
 let ps;
 
-const switchRoutes = (
-  <Switch>
-    {dashboardRoutes.map((prop, key) => {
-      if (prop.layout === "/project") {
-        return (
-          <Route
-            path={prop.layout + '/:pid' + prop.path}
-            component={prop.component}
-            key={key}
-          />
-        );
-      }
-      return null;
-    })}
-  </Switch>
-);
+const switchRoutes = (setMessage) => {
+  return (
+    <Switch>
+      {dashboardRoutes.map((item, key) => {
+        if (item.layout === "/project") {
+          return (
+            <Route
+              path={item.layout + '/:pid' + item.path}
+              key={key}
+              render={(props) => {
+                return <item.component {...props} setMessage={setMessage} />
+              }}
+            />
+          );
+        }
+        return null;
+      })}
+    </Switch>
+  )
+};
 
 const useStyles = makeStyles(styles);
 
@@ -44,28 +51,10 @@ export default function Project(props) {
   // ref to help us initialize PerfectScrollbar on windows devices
   const mainPanel = React.createRef();
   // states and functions
-  const [image, setImage] = React.useState(bgImage);
-  const [color, setColor] = React.useState("blue");
-  const [fixedClasses, setFixedClasses] = React.useState("dropdown show");
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const handleImageClick = image => {
-    setImage(image);
-  };
-  const handleColorClick = color => {
-    setColor(color);
-  };
-  const handleFixedClick = () => {
-    if (fixedClasses === "dropdown") {
-      setFixedClasses("dropdown show");
-    } else {
-      setFixedClasses("dropdown");
-    }
-  };
+  const [message, setMessage] = React.useState('');
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
-  };
-  const getRoute = () => {
-    return window.location.pathname !== "/admin/maps";
   };
   const resizeFunction = () => {
     if (window.innerWidth >= 960) {
@@ -92,15 +81,26 @@ export default function Project(props) {
   }, [mainPanel]);
   return (
     <div className={classes.wrapper}>
+      <div>
+        <Snackbar
+          place="br"
+          color="danger"
+          icon={AddAlert}
+          message={message}
+          open={message !== ''}
+          closeNotification={() => setMessage('')}
+          close
+        />
+      </div>
       <Sidebar
         basePath={`/project/${props.match.params.pid}`}
         routes={dashboardRoutes}
         logoText={"Creative Tim"}
         logo={logo}
-        image={image}
+        image={bgImage}
         handleDrawerToggle={handleDrawerToggle}
         open={mobileOpen}
-        color={color}
+        color='blue'
         {...props}
       />
       <div className={classes.mainPanel} ref={mainPanel}>
@@ -109,15 +109,10 @@ export default function Project(props) {
           handleDrawerToggle={handleDrawerToggle}
           {...props}
         />
-        {/* On the /maps route we want the map to be on full screen - this is not possible if the content and conatiner classes are present because they have some paddings which would make the map smaller */}
-        {getRoute() ? (
-          <div className={classes.content}>
-            <div className={classes.container}>{switchRoutes}</div>
-          </div>
-        ) : (
-          <div className={classes.map}>{switchRoutes}</div>
-        )}
-        {getRoute() ? <Footer /> : null}
+        <div className={classes.content}>
+          <div className={classes.container}>{switchRoutes(setMessage)}</div>
+        </div>
+        <Footer />
       </div>
     </div>
   );
