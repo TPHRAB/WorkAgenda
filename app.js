@@ -6,7 +6,7 @@ const express = require('express'),
   session = require('express-session'),
   SQLiteStore = require('connect-sqlite3')(session),
   { login, register, updateNotes } = require('./lib/user'),
-  { createProject, getProjects, getProjectInfo } = require('./lib/project'),
+  { createProject, getProjects, getProjectInfo, updateProjectInfo } = require('./lib/project'),
   { createBug, getBugs } = require('./lib/bugs');
 
 // initialize server
@@ -124,7 +124,7 @@ app.get(API_URL + '/isLoggedIn', async (req, res) => {
  * method: GET
  * return: 1. If success, return JSON:
  *            {
- *              {projectName, owner, status, bugs, startDate, endDate},
+ *              {pid, name, owner, status, bugs, startDate, endDate},
  *              ...
  *            }
  *         2. If failed, end with status code 401 and return JSON:
@@ -160,9 +160,9 @@ app.post(API_URL + '/portal/create-project', async (req, res) => {
     await checkLoggedin(req);
 
     // if logged in
-    const {projectName, startDate, endDate, overview} = req.body;
-    await createProject(req.session.username, projectName, startDate,
-                  endDate, overview);
+    const {name, start_date, end_date, overview} = req.body;
+    await createProject(req.session.username, name, start_date,
+                  end_date, overview);
 
     res.end();
   } catch (error) {
@@ -204,7 +204,7 @@ app.post(API_URL + '/project/create-bug', async (req, res) => {
  * params: pid
  * return: 1. If success, return JSON in format:
  *            [
- *              { bug, reporter, created_date, status,
+ *              { bid, title, reporter, created_date, status,
  *                assignee, due_date, severity },
  *              ...
  *            ]
@@ -213,11 +213,11 @@ app.post(API_URL + '/project/create-bug', async (req, res) => {
  *              error: 'error message'
  *            }
  */
-app.post(API_URL + '/project/get-bugs', async (req, res) => {
+app.get(API_URL + '/project/get-bugs', async (req, res) => {
   try {
     await checkLoggedin(req);
 
-    let result = await getBugs(req.session.username, req.body.pid);
+    let result = await getBugs(req.session.username, req.query.pid);
 
     res.json(result);
   } catch (error) {
@@ -289,7 +289,32 @@ app.post(API_URL + '/project/update-notes', async (req, res) => {
   } catch (error) {
     handleError(error, res);
   }
+});
 
+/**
+ * Usage: Update project's info
+ * method: POST
+ * params: pid -project id
+ *         newValues - column to update (name, owner, status, start_date,
+ *                     end_date, overview)
+ *         (If any of the fields are provided, the original value will be
+ *          overwritten. Not provided fields will remain the same)
+ * return: 1. If success, end with status code 200
+ *         2. If failed, end with status code 401 and return JSON:
+ *            {
+ *              error: 'error message'
+ *            }
+ */
+app.post(API_URL + '/project/update-project', async (req,res) => {
+  try {
+    await checkLoggedin(req);
+
+    const {pid, newValues} = req.body;
+    await updateProjectInfo(req.session.username, pid, newValues);
+    res.end();
+  } catch (error) {
+    handleError(error, res);
+  }
 });
 
 function handleError(error, res) {

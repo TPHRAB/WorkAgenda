@@ -1,0 +1,13 @@
+.increase-bottom-margin {
+  margin-bottom: 1em !important;
+}
+
+.hide-horizontal-scroll-bar {
+  overflow-inline: hidden;
+}
+
+.wrapper {
+  display: block !important;
+  padding-top: 10.5px;
+  padding-bottom: 10.5px;
+}

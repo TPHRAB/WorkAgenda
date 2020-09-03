@@ -11,7 +11,6 @@ import Navbar from "components/Navbars/Navbar.js";
 import Footer from "components/Footer/Footer.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
 import Snackbar from "components/Snackbar/Snackbar.js";
-import Button from "components/CustomButtons/Button.js";
 
 import { dashboardRoutes } from "routes.js";
 
