@@ -34,10 +34,7 @@ const API_URL = '/api';
  * method: POST
  * params: username, password
  * return: 1. If success, status code 200 and return nothing
- *         2. If failed, return JSON:
- *            {
- *              error: 'error message'
- *            }, and status code 401
+ *         2. If failed, end with status code 401 with error message
  */
 app.post(API_URL + '/login', async (req, res) => {
   let username = req.body.username;
@@ -62,10 +59,7 @@ app.post(API_URL + '/login', async (req, res) => {
  * method: POST
  * params: username, password, first name, last name
  * return: 1. If success, end with status code 200 and return nothing
- *         2. If failed, end with status code 401 and return JSON:
- *            {
- *              error: 'error message'
- *            }
+ *         2. If failed, end with status code 401 with error message
  */
 app.post(API_URL + '/register', async (req, res) => {
   const {username, password, firstName, lastName} = req.body;
@@ -83,10 +77,7 @@ app.post(API_URL + '/register', async (req, res) => {
  * usage: Logout an accout
  * method: GET
  * return: 1. If success, end with status code 200 and return nothing
- *         2. If failed, end with status code 401 and return JSON:
- *            {
- *              error: 'error message'
- *            }
+ *         2. If failed, end with status code 401 with error message
  */
 app.get(API_URL + '/logout', async (req, res) => {
   try {
@@ -104,10 +95,7 @@ app.get(API_URL + '/logout', async (req, res) => {
  * usage: Check whether user is logged in
  * method: GET
  * return: 1. If success, end with status code 200 and return nothing
- *         2. If failed, end with status code 401 and return JSON:
- *            {
- *              error: 'error message'
- *            }
+ *         2. If failed, end with status code 401 with error message
  */
 app.get(API_URL + '/isLoggedIn', async (req, res) => {
   try {
@@ -127,10 +115,7 @@ app.get(API_URL + '/isLoggedIn', async (req, res) => {
  *              {pid, name, owner, status, bugs, startDate, endDate},
  *              ...
  *            }
- *         2. If failed, end with status code 401 and return JSON:
- *            {
- *              error: 'error message'
- *            }
+ *         2. If failed, end with status code 401 with error message
  */
 app.get(API_URL + '/portal/get-projects', async (req, res) => {
   try {
@@ -150,10 +135,7 @@ app.get(API_URL + '/portal/get-projects', async (req, res) => {
  * method: POST
  * params: projectName, startDate, endDate, overview
  * return: 1. If success, end with status code 200.
- *         2. If failed, end with status code 401 and return JSON:
- *            {
- *              error: 'error message'
- *            }
+ *         2. If failed, end with status code 401 with error message
  */
 app.post(API_URL + '/portal/create-project', async (req, res) => {
   try {
@@ -180,18 +162,15 @@ app.post(API_URL + '/portal/create-project', async (req, res) => {
  *                   values out of range will be considered to be 0
  *         pid
  * return: 1. If success, end with status code 200.
- *         2. If failed, end with status code 401 and return JSON:
- *            {
- *              error: 'error message'
- *            }
+ *         2. If failed, end with status code 401 with error message
  */
 app.post(API_URL + '/project/create-bug', async (req, res) => {
   try {
     await checkLoggedin(req);
 
-    const {bugTitle, assignee, dueDate, severity, pid} = req.body;
-    await createBug(req.session.username, bugTitle,
-                    assignee, dueDate, severity, pid);
+    const {title, description, due_date, severity, pid} = req.body;
+    await createBug(req.session.username, title,
+                    description, due_date, severity, pid);
     res.end();
   } catch (error) {
     handleError(error, res);
@@ -208,10 +187,7 @@ app.post(API_URL + '/project/create-bug', async (req, res) => {
  *                assignee, due_date, severity },
  *              ...
  *            ]
- *         2. If failed, end with status code 401 and return JSON:
- *            {
- *              error: 'error message'
- *            }
+ *         2. If failed, end with status code 401 with error message
  */
 app.get(API_URL + '/project/get-bugs', async (req, res) => {
   try {
@@ -252,10 +228,7 @@ app.get(API_URL + '/project/get-bugs', async (req, res) => {
  *                ...
  *              ]
  *            }
- *         2. If failed, end with status code 401 and return JSON:
- *            {
- *              error: 'error message'
- *            }
+ *         2. If failed, end with status code 401 with error message
  */
 app.get(API_URL + '/project/dashboard', async (req, res) => {
   try {
@@ -274,10 +247,7 @@ app.get(API_URL + '/project/dashboard', async (req, res) => {
  * params: pid - project id,
  *         notes - JSON list in format [note1, ...]
  * return: 1. If success, end with status code 200
- *         2. If failed, end with status code 401 and return JSON:
- *            {
- *              error: 'error message'
- *            }
+ *         2. If failed, end with status code 401 with error message
  */
 app.post(API_URL + '/project/update-notes', async (req, res) => {
   try {
@@ -300,10 +270,7 @@ app.post(API_URL + '/project/update-notes', async (req, res) => {
  *         (If any of the fields are provided, the original value will be
  *          overwritten. Not provided fields will remain the same)
  * return: 1. If success, end with status code 200
- *         2. If failed, end with status code 401 and return JSON:
- *            {
- *              error: 'error message'
- *            }
+ *         2. If failed, end with status code 401 with error message
  */
 app.post(API_URL + '/project/update-project', async (req,res) => {
   try {
@@ -320,12 +287,10 @@ app.post(API_URL + '/project/update-project', async (req,res) => {
 function handleError(error, res) {
   if (typeof error === 'string') {
     // Promise been rejected
-    res.status(401).json({ error });
+    res.status(401).send(error);
   } else {
-    res.status(500).json({
-      error: "Internal Server Error. Please try agin later."
-    });
     console.log(error.message);
+    res.status(500).send('Internal Server Error. Please try agin later.');
   }
 }
 

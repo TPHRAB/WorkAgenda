@@ -15,6 +15,8 @@ import NewProject from "components/NewProject/NewProject";
 import Snackbar from "components/Snackbar/Snackbar.js";
 // css
 import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
+// utils
+import moment from 'moment';
 
 import { dashboardRoutes } from "routes.js";
 
@@ -51,24 +53,22 @@ export default function Portal({ history, ...rest }) {
     }
   };
   const createProject = (data) => {
-    console.log(data)
-    let params = new FormData();
-    params.append("name", data.name)
-    params.append("start_date", data.start_date)
-    params.append("end_date", data.end_date)
-    params.append("overview", data.overview)
-    fetch('/api/portal/create-project', { method: 'POST', body: params })
-      .then(res => {
-        if (res.ok) {
-          setPopupOpen(false);
-          data['status'] = 'ACTIVE';
-          data['bugs'] = <span><span style={{color: 'red'}}>0</span> / <span style={{color: 'grey'}}>0</span></span>
-          setRows([...rows, data]);
-        }
-      })
-      .catch(err => {
-        setMessage(err);
-      });
+    fetch('/api/portal/create-project', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error('Server error');
+      }
+      window.location.reload();
+    })
+    .catch(err => {
+      setMessage(err.message);
+    });
   }
   // initialize and destroy the PerfectScrollbar plugin
   React.useEffect(() => {
@@ -97,12 +97,14 @@ export default function Portal({ history, ...rest }) {
         json.forEach(p => {
           p['status'] = <span style={{color: 'green'}}>{p['status']}</span>;
           p['bugs'] = <span><span style={{color: 'red'}}>{p['bugs'][0]}</span> / <span style={{color: 'grey'}}>{p['bugs'][1]}</span></span>
+          p['start_date'] = moment(p['start_date']).format('MM-DD-YYYY');
+          p['end_date'] = moment(p['end_date']).format('MM-DD-YYYY');
         });
         setRows(json);
       });
   }, [])
 
-  const handleClick = (event, pid) => {
+  const handleClick = (pid) => {
     history.push(`/project/${pid}/dashboard`);
   };
 

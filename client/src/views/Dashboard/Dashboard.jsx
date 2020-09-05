@@ -25,12 +25,21 @@ import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js"
 const useStyles = makeStyles(styles);
 
 
-function createData(userIcon, title, type, message) {
+function createOverdueWork(userIcon, title, type, message) {
   if (!userIcon) {
     userIcon = <AccountCircleIcon />;
   }
   type = <BugReportIcon />;
   message = `late by ${message} days`;
+  return { userIcon, title, type, message };
+}
+
+function createUpcomingWork(userIcon, title, type, message) {
+  if (!userIcon) {
+    userIcon = <AccountCircleIcon />;
+  }
+  type = <BugReportIcon />;
+  message = `due in ${message} days`;
   return { userIcon, title, type, message };
 }
 
@@ -52,7 +61,7 @@ export default function Dadhboard(props) {
     params.append('notes', JSON.stringify(notes));
     fetch('/api/project/update-notes', { method: 'POST', body: params })
       .then(res => {
-        if (!res.ok) props.setMessage('Cannot connect to the server');
+        if (!res.ok) props.setMessage('Server error');
       })
     setNotes(notes);
   }
@@ -63,7 +72,6 @@ export default function Dadhboard(props) {
     fetch('/api/project/update-project', {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -85,14 +93,14 @@ export default function Dadhboard(props) {
         let temp = [];
         // set overdue works
         json.overdueWork.forEach(item => {
-          temp.push(createData(null, item.title, null, item.lateDays));
+          temp.push(createOverdueWork(null, item.title, null, item.lateDays));
         });
         setOverdueWork(temp);
 
         temp = [];
         // set overdue works
-        json.overdueWork.forEach(item => {
-          upcomingWork.push(createData(null, item.title, null, item.lateDays));
+        json.upcomingWork.forEach(item => {
+          temp.push(createUpcomingWork(null, item.title, null, item.daysLeft));
         });
         setUpcomingWork(temp);
 

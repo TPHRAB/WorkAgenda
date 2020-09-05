@@ -150,7 +150,7 @@ export default function EnhancedTable(props) {
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => handleClick(event, row[idColumn])}
+                    onClick={() => handleClick(row[idColumn])}
                     role="checkbox"
                     tabIndex={-1}
                     key={row[idColumn]}

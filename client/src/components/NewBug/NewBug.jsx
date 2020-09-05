@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 // @material-ui
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -9,13 +9,20 @@ import Button from "components/CustomButtons/Button.js";
 import Divider from '@material-ui/core/Divider';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
+import {
+  MuiPickersUtilsProvider,
+  KeyboardDatePicker,
+} from '@material-ui/pickers';
+import { createMuiTheme } from "@material-ui/core";
+import { ThemeProvider } from "@material-ui/styles";
 // core
 import GridContainer from 'components/Grid/GridContainer';
 import GridItem from 'components/Grid/GridItem';
 // widget
+import moment from 'moment';
+import MomentUtils from "@date-io/moment";
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { useForm } from 'react-hook-form';
@@ -25,28 +32,54 @@ import 'assets/css/popup.css';
 const useStyles = makeStyles((theme) => ({
   formControl: {
     minWidth: 120,
+  },
+  dateInput: {
+    paddingTop: '10.5px',
+    marginTop: '0px'
   }
 }));
 
-export default function NewProject(props) {
+const materialTheme = createMuiTheme({
+  overrides: {
+    MuiFormControl: {
+      marginNormal: {
+        marginTop: '0px',
+        paddingTop: '10.5px'
+      }
+    }
+  }
+});
+
+export default function NewBug(props) {
   const classes = useStyles();
-  const { popupOpen, setPopupOpen, createBug } = props
+  const { createBugOpen, setCreateBugOpen, createBug } = props
   const { register, handleSubmit } = useForm();
 
   // states
   let description = "";
-  const [age, setAge] = React.useState('');
+  const [selectedDate, setSelectedDate] = React.useState(moment());
+  const [severity, setSeverity] = React.useState(0);
 
   const handleClose = () => {
-    setPopupOpen(false);
+    setCreateBugOpen(false);
   }
 
+  const handleDateChange = (date) => {
+    console.log(date)
+    setSelectedDate(date);
+  };
+
   const onSubmit = (data) => {
-    createBug({description, ...data});
+    createBug({
+      description,
+      due_date: selectedDate.format('YYYY-MM-DD'),
+      severity,
+      ...data
+    })
   }
 
   return (
-      <Dialog open={popupOpen} onClose={handleClose} aria-labelledby="form-dialog-title" disableBackdropClick disableEscapeKeyDown>
+      <Dialog open={createBugOpen} onClose={handleClose} aria-labelledby="form-dialog-title" disableBackdropClick disableEscapeKeyDown>
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogTitle id="form-dialog-title">New Project</DialogTitle>
           <Divider variant="middle" />
@@ -57,7 +90,7 @@ export default function NewProject(props) {
                 <TextField
                   autoFocus
                   margin="dense"
-                  name="name"
+                  name="title"
                   fullWidth
                   variant="outlined"
                   inputRef={register}
@@ -72,59 +105,44 @@ export default function NewProject(props) {
                   />
                 </div>
               </GridItem>
-              <GridItem xs={12} sm={12} md={12} className="increase-bottom-margin">
-                <b>Assign to</b>
-                <div className="wrapper">
-                  <FormControl variant="outlined" className={classes.formControl}>
-                    <InputLabel id="demo-simple-select-outlined-label">Age</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-outlined-label"
-                      id="demo-simple-select-outlined"
-                      value={age}
-                      label="Age"
-                    >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
-                      <MenuItem value={10}>Ten</MenuItem>
-                      <MenuItem value={20}>Twenty</MenuItem>
-                      <MenuItem value={30}>Thirty</MenuItem>
-                    </Select>
-                  </FormControl>
-                </div>
-              </GridItem>
-              <GridItem xs={12} sm={12} md={12} className="increase-bottom-margin">
-                <b>Add Followers</b>
-                <TextField
-                  autoFocus
-                  margin="dense"
-                  name="name"
-                  fullWidth
-                  variant="outlined"
-                  inputRef={register}
-                />
-              </GridItem>
               <GridItem xs={12} sm={12} md={6} className="increase-bottom-margin">
                 <b>Due date</b>
-                <TextField
-                  autoFocus
-                  margin="dense"
-                  name="name"
-                  fullWidth
-                  variant="outlined"
-                  inputRef={register}
-                />
+                <ThemeProvider theme={materialTheme}>
+                  <MuiPickersUtilsProvider utils={MomentUtils}>
+                    <KeyboardDatePicker
+                      disableToolbar
+                      autoOk
+                      variant="inline"
+                      format="YYYY/MM/DD"
+                      margin="normal"
+                      id="date-picker-inline"
+                      value={selectedDate}
+                      onChange={handleDateChange}
+                      KeyboardButtonProps={{
+                          'aria-label': 'change date',
+                        }}
+                      inputVariant="outlined"
+                    />
+                  </MuiPickersUtilsProvider>
+                </ThemeProvider>
               </GridItem>
               <GridItem xs={12} sm={12} md={6} className="increase-bottom-margin">
                 <b>Severity</b>
-                <TextField
-                  autoFocus
-                  margin="dense"
-                  name="name"
-                  fullWidth
-                  variant="outlined"
-                  inputRef={register}
-                />
+                <div className="wrapper">
+                  <FormControl variant="outlined" className={classes.formControl} fullWidth>
+                    <Select
+                      labelId="demo-simple-select-outlined-label"
+                      id="demo-simple-select-outlined"
+                      value={severity}
+                      onChange={(event) => setSeverity(event.target.value)}
+                    >
+                      <MenuItem value={0}>None</MenuItem>
+                      <MenuItem value={1}>Minor</MenuItem>
+                      <MenuItem value={2}>Major</MenuItem>
+                      <MenuItem value={3}>Critical</MenuItem>
+                    </Select>
+                  </FormControl>
+                </div>
               </GridItem>
             </GridContainer>
           </DialogContent>

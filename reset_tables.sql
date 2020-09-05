@@ -47,12 +47,11 @@ CREATE TABLE bugs (
   title TEXT NOT NULL, --bug title
   reporter varchar(255),
   created_date varchar(10) NOT NULL, -- YYYY-MM-DD
-  status varchar(11) DEFAULT 'OPEN', -- open/in progress/closed
-  assignee varchar(255),
-  due_date varchar(19) DEFAULT 'N/A', -- YYYY-MM-DD hh:mm AM/PM
-  severity varchar(8) NOT NULL, -- none/critical/major/minor
+  status INTEGER DEFAULT 0, -- (0, 1) open/closed
+  due_date varchar(19) NOT NULL, -- YYYY-MM-DD hh:mm AM/PM
+  severity INTEGER, -- (0, 1, 2, 3) none/critical/major/minor
+  description TEXT NOT NULL,
   pid INTEGER,
   FOREIGN KEY (reporter) REFERENCES users,
-  FOREIGN KEY (assignee) REFERENCES users,
   FOREIGN KEY (pid) REFERENCES projects
 );

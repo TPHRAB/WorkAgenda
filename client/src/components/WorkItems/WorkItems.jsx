@@ -14,9 +14,10 @@ const useStyles = makeStyles({
     fontSize: "14px"
   },
   userIconColumn: {
-    width: "0px"
+    width: "10%"
   },
   dateColumn: {
+    width: '30%',
     whiteSpace: "nowrap"
   },
   emptyList: {
