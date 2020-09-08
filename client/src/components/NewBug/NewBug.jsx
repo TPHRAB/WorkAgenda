@@ -25,7 +25,6 @@ import moment from 'moment';
 import MomentUtils from "@date-io/moment";
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { useForm } from 'react-hook-form';
 // css
 import 'assets/css/popup.css';
 
@@ -53,104 +52,100 @@ const materialTheme = createMuiTheme({
 export default function NewBug(props) {
   const classes = useStyles();
   const { createBugOpen, setCreateBugOpen, createBug } = props
-  const { register, handleSubmit } = useForm();
 
   // states
-  let description = "";
+  let description = '';
   const [selectedDate, setSelectedDate] = React.useState(moment());
   const [severity, setSeverity] = React.useState(0);
+  const [title, setTitle] = React.useState()
 
   const handleClose = () => {
     setCreateBugOpen(false);
   }
 
-  const handleDateChange = (date) => {
-    console.log(date)
-    setSelectedDate(date);
-  };
+  const handleTitleChange = (event) => {
+    setTitle(event.target.value);
+  }
 
-  const onSubmit = (data) => {
+  const onSubmit = () => {
     createBug({
       description,
       due_date: selectedDate.format('YYYY-MM-DD'),
       severity,
-      ...data
+      title
     })
   }
 
   return (
       <Dialog open={createBugOpen} onClose={handleClose} aria-labelledby="form-dialog-title" disableBackdropClick disableEscapeKeyDown>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogTitle id="form-dialog-title">New Project</DialogTitle>
-          <Divider variant="middle" />
-          <DialogContent>
-            <GridContainer className="hide-horizontal-scroll-bar">
-              <GridItem className="increase-bottom-margin" xs={12} sm={12} md={12}>
-                <b>Bug Title</b>
-                <TextField
-                  autoFocus
-                  margin="dense"
-                  name="title"
-                  fullWidth
-                  variant="outlined"
-                  inputRef={register}
+        <DialogTitle id="form-dialog-title">New Project</DialogTitle>
+        <Divider variant="middle" />
+        <DialogContent>
+          <GridContainer className="hide-horizontal-scroll-bar">
+            <GridItem className="increase-bottom-margin" xs={12} sm={12} md={12}>
+              <b>Bug Title</b>
+              <TextField
+                autoFocus
+                margin="dense"
+                fullWidth
+                variant="outlined"
+                onChange={handleTitleChange}
+              />
+            </GridItem>
+            <GridItem xs={12} sm={12} md={12} className="increase-bottom-margin">
+              <b>Description</b>
+              <div className="wrapper">
+                <CKEditor
+                  editor={ ClassicEditor }
+                  onChange={(event, editor) => description = editor.getData()}
                 />
-              </GridItem>
-              <GridItem xs={12} sm={12} md={12} className="increase-bottom-margin">
-                <b>Description</b>
-                <div className="wrapper">
-                  <CKEditor
-                    editor={ ClassicEditor }
-                    onChange={(event, editor) => description = editor.getData()}
+              </div>
+            </GridItem>
+            <GridItem xs={12} sm={12} md={6} className="increase-bottom-margin">
+              <b>Due date</b>
+              <ThemeProvider theme={materialTheme}>
+                <MuiPickersUtilsProvider utils={MomentUtils}>
+                  <KeyboardDatePicker
+                    disableToolbar
+                    autoOk
+                    variant="inline"
+                    format="YYYY/MM/DD"
+                    margin="normal"
+                    id="date-picker-inline"
+                    value={selectedDate}
+                    onChange={setSelectedDate}
+                    KeyboardButtonProps={{
+                        'aria-label': 'change date',
+                      }}
+                    inputVariant="outlined"
                   />
-                </div>
-              </GridItem>
-              <GridItem xs={12} sm={12} md={6} className="increase-bottom-margin">
-                <b>Due date</b>
-                <ThemeProvider theme={materialTheme}>
-                  <MuiPickersUtilsProvider utils={MomentUtils}>
-                    <KeyboardDatePicker
-                      disableToolbar
-                      autoOk
-                      variant="inline"
-                      format="YYYY/MM/DD"
-                      margin="normal"
-                      id="date-picker-inline"
-                      value={selectedDate}
-                      onChange={handleDateChange}
-                      KeyboardButtonProps={{
-                          'aria-label': 'change date',
-                        }}
-                      inputVariant="outlined"
-                    />
-                  </MuiPickersUtilsProvider>
-                </ThemeProvider>
-              </GridItem>
-              <GridItem xs={12} sm={12} md={6} className="increase-bottom-margin">
-                <b>Severity</b>
-                <div className="wrapper">
-                  <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                    <Select
-                      labelId="demo-simple-select-outlined-label"
-                      id="demo-simple-select-outlined"
-                      value={severity}
-                      onChange={(event) => setSeverity(event.target.value)}
-                    >
-                      <MenuItem value={0}>None</MenuItem>
-                      <MenuItem value={1}>Minor</MenuItem>
-                      <MenuItem value={2}>Major</MenuItem>
-                      <MenuItem value={3}>Critical</MenuItem>
-                    </Select>
-                  </FormControl>
-                </div>
-              </GridItem>
-            </GridContainer>
-          </DialogContent>
-          <DialogActions>
-            <Button type="submit" color="primary">Add</Button>
-            <Button onClick={handleClose} color="default">Cancel</Button>
-          </DialogActions>
-        </form>
+                </MuiPickersUtilsProvider>
+              </ThemeProvider>
+            </GridItem>
+            <GridItem xs={12} sm={12} md={6} className="increase-bottom-margin">
+              <b>Severity</b>
+              <div className="wrapper">
+                <FormControl variant="outlined" className={classes.formControl} fullWidth>
+                  <Select
+                    labelId="demo-simple-select-outlined-label"
+                    id="demo-simple-select-outlined"
+                    value={severity}
+                    onChange={(event) => setSeverity(event.target.value)}
+                  >
+                    <MenuItem value={0}>None</MenuItem>
+                    <MenuItem value={1}>Minor</MenuItem>
+                    <MenuItem value={2}>Major</MenuItem>
+                    <MenuItem value={3}>Critical</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+            </GridItem>
+          </GridContainer>
+        </DialogContent>
+        <DialogActions>
+          <Button type="submit" color="primary" onClick={onSubmit}>Add</Button>
+          <Button onClick={handleClose} color="default">Cancel</Button>
+        </DialogActions>
       </Dialog>
   )
 }
