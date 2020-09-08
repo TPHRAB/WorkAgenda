@@ -3,7 +3,7 @@
 }
 
 .hide-horizontal-scroll-bar {
-  overflow-inline: hidden;
+  overflow: hidden;
 }
 
 .wrapper {
