@@ -137,6 +137,12 @@ export default function Dadhboard(props) {
                     editor={ ClassicEditor }
                     data={description}
                     onChange={(event, editor) => tempOverview = editor.getData()}
+                    config={{         
+                      toolbar: [
+                        'heading', '|', 'bold', 'italic', 'blockQuote', 'link', '|', 'numberedList',
+                        'bulletedList', 'insertTable', '|', 'undo', 'redo'
+                      ],
+                    }}
                   />
                   <Button id="editor-button" type="button" color="info" onClick={syncOverview}>Save</Button>
                   <Button id="editor-button" type="button" color="default" onClick={() => setEditorState(false)}>Cancel</Button>

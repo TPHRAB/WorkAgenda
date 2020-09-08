@@ -98,6 +98,12 @@ export default function NewBug(props) {
                 <CKEditor
                   editor={ ClassicEditor }
                   onChange={(event, editor) => description = editor.getData()}
+                  config={{         
+                    toolbar: [
+                      'heading', '|', 'bold', 'italic', 'blockQuote', '|', 'numberedList',
+                      'bulletedList', 'insertTable', '|', 'undo', 'redo'
+                    ],
+                  }}
                 />
               </div>
             </GridItem>

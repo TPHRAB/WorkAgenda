@@ -144,8 +144,11 @@ export default function EditBug(props) {
               data={description}
               editor={ ClassicEditor }
               onChange={(event, editor) => setDescription(editor.getData())}
-              config={{
-                fontSize_defaultLabel: '0.5em'
+              config={{         
+                toolbar: [
+                  'heading', '|', 'bold', 'italic', 'blockQuote', 'highlight', '|', 'numberedList',
+                  'bulletedList', 'insertTable', '|', 'undo', 'redo'
+                ],
               }}
             />
           </Grid>

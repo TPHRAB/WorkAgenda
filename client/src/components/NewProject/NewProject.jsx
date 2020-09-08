@@ -84,6 +84,12 @@ export default function NewProject(props) {
                 <CKEditor
                   editor={ ClassicEditor }
                   onChange={(event, editor) => overview = editor.getData()}
+                  config={{         
+                    toolbar: [
+                      'heading', '|', 'bold', 'italic', 'blockQuote', '|', 'numberedList',
+                      'bulletedList', 'insertTable', '|', 'undo', 'redo'
+                    ],
+                  }}
                 />
               </GridItem>
             </GridContainer>
