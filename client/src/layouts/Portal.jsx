@@ -34,6 +34,8 @@ const headCells = [
   { id: 'end_date', label: 'END DATE', date: true }
 ];
 
+const STATUS = ['ACTIVE', 'CLOSE']
+
 export default function Portal({ history, ...rest }) {
   // styles
   const classes = useStyles();
@@ -53,7 +55,7 @@ export default function Portal({ history, ...rest }) {
     }
   };
   const createProject = (data) => {
-    fetch('/api/portal/create-project', {
+    fetch('/api/create-project', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -91,11 +93,11 @@ export default function Portal({ history, ...rest }) {
 
   React.useEffect(() => {
     // fetch data from endpoint
-    fetch('/api/portal/get-projects')
+    fetch('/api/get-projects')
       .then(res => res.json())
       .then(json => {
         json.forEach(p => {
-          p['status'] = <span style={{color: 'green'}}>{p['status']}</span>;
+          p['status'] = <span style={{color: 'green'}}>{STATUS[p['status']]}</span>;
           p['bugs'] = <span><span style={{color: 'red'}}>{p['bugs'][0]}</span> / <span style={{color: 'grey'}}>{p['bugs'][1]}</span></span>
           p['start_date'] = moment(p['start_date']).format('MM-DD-YYYY');
           p['end_date'] = moment(p['end_date']).format('MM-DD-YYYY');

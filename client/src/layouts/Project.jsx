@@ -21,7 +21,7 @@ import logo from "assets/img/reactlogo.png";
 
 let ps;
 
-const switchRoutes = (setMessage) => {
+const switchRoutes = (showPopupMessage) => {
   return (
     <Switch>
       {dashboardRoutes.map((item, key) => {
@@ -31,7 +31,7 @@ const switchRoutes = (setMessage) => {
               path={item.layout + '/:pid' + item.path}
               key={key}
               render={(props) => {
-                return <item.component {...props} setMessage={setMessage} />
+                return <item.component {...props} showPopupMessage={showPopupMessage} />
               }}
             />
           );
@@ -51,7 +51,10 @@ export default function Project(props) {
   const mainPanel = React.createRef();
   // states and functions
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [showMessage, setShowMessage] = React.useState(false);
   const [message, setMessage] = React.useState('');
+  const [color, setColor] = React.useState('danger');
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
@@ -60,6 +63,15 @@ export default function Project(props) {
       setMobileOpen(false);
     }
   };
+  const showPopupMessage = (message, color) => {
+    // close the popup message first and then reopen it up
+    setShowMessage(false);
+    setTimeout(() => {
+      setShowMessage(true);
+      setMessage(message);
+      setColor(color);
+    });
+  }
   // initialize and destroy the PerfectScrollbar plugin
   React.useEffect(() => {
     if (navigator.platform.indexOf("Win") > -1) {
@@ -83,11 +95,11 @@ export default function Project(props) {
       <div>
         <Snackbar
           place="br"
-          color="danger"
+          color={color}
           icon={AddAlert}
           message={message}
-          open={message !== ''}
-          closeNotification={() => setMessage('')}
+          open={showMessage}
+          closeNotification={() => setShowMessage(false)}
           close
         />
       </div>
@@ -109,7 +121,7 @@ export default function Project(props) {
           {...props}
         />
         <div className={classes.content}>
-          <div className={classes.container}>{switchRoutes(setMessage)}</div>
+          <div className={classes.container}>{switchRoutes(showPopupMessage)}</div>
         </div>
         <Footer />
       </div>

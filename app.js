@@ -6,8 +6,9 @@ const express = require('express'),
   session = require('express-session'),
   SQLiteStore = require('connect-sqlite3')(session),
   { login, register, updateNotes } = require('./lib/user'),
-  { createProject, getProjects, getProjectInfo, updateProjectInfo } = require('./lib/project'),
-  { createBug, getBugs } = require('./lib/bugs');
+  { createProject, getProjects, getProjectInfo,
+    updateProjectInfo } = require('./lib/project'),
+  { createBug, getBugs, editBug, getBugInfo, commentBug } = require('./lib/bugs');
 
 // initialize server
 const PORT = process.env.port || 3001;
@@ -82,7 +83,7 @@ app.post(API_URL + '/register', async (req, res) => {
 app.get(API_URL + '/logout', async (req, res) => {
   try {
     if (!req.session.username) {
-      await Promise.reject('Never logged in as a username');
+      await Promise.reject('You haven\'t logged in');
     }
     req.session.destroy();
     res.end();
@@ -94,17 +95,11 @@ app.get(API_URL + '/logout', async (req, res) => {
 /**
  * usage: Check whether user is logged in
  * method: GET
- * return: 1. If success, end with status code 200 and return nothing
- *         2. If failed, end with status code 401 with error message
+ * return: 1. If logged-in, return the username
+ *         2. If not logged-in, return null
  */
-app.get(API_URL + '/isLoggedIn', async (req, res) => {
-  try {
-    await checkLoggedin(req);
-    // if no rejected Promise or error
-    res.end();
-  } catch (error) {
-    handleError(error, res);
-  }
+app.get(API_URL + '/logged-in-username', async (req, res) => {
+  res.send(req.session.username);
 });
 
 /**
@@ -117,7 +112,7 @@ app.get(API_URL + '/isLoggedIn', async (req, res) => {
  *            }
  *         2. If failed, end with status code 401 with error message
  */
-app.get(API_URL + '/portal/get-projects', async (req, res) => {
+app.get(API_URL + '/get-projects', async (req, res) => {
   try {
     await checkLoggedin(req);
 
@@ -137,7 +132,7 @@ app.get(API_URL + '/portal/get-projects', async (req, res) => {
  * return: 1. If success, end with status code 200.
  *         2. If failed, end with status code 401 with error message
  */
-app.post(API_URL + '/portal/create-project', async (req, res) => {
+app.post(API_URL + '/create-project', async (req, res) => {
   try {
     await checkLoggedin(req);
 
@@ -164,7 +159,7 @@ app.post(API_URL + '/portal/create-project', async (req, res) => {
  * return: 1. If success, end with status code 200.
  *         2. If failed, end with status code 401 with error message
  */
-app.post(API_URL + '/project/create-bug', async (req, res) => {
+app.post(API_URL + '/create-bug', async (req, res) => {
   try {
     await checkLoggedin(req);
 
@@ -189,7 +184,7 @@ app.post(API_URL + '/project/create-bug', async (req, res) => {
  *            ]
  *         2. If failed, end with status code 401 with error message
  */
-app.get(API_URL + '/project/get-bugs', async (req, res) => {
+app.get(API_URL + '/get-bugs', async (req, res) => {
   try {
     await checkLoggedin(req);
 
@@ -230,7 +225,7 @@ app.get(API_URL + '/project/get-bugs', async (req, res) => {
  *            }
  *         2. If failed, end with status code 401 with error message
  */
-app.get(API_URL + '/project/dashboard', async (req, res) => {
+app.get(API_URL + '/dashboard', async (req, res) => {
   try {
     await checkLoggedin(req);
 
@@ -249,7 +244,7 @@ app.get(API_URL + '/project/dashboard', async (req, res) => {
  * return: 1. If success, end with status code 200
  *         2. If failed, end with status code 401 with error message
  */
-app.post(API_URL + '/project/update-notes', async (req, res) => {
+app.post(API_URL + '/update-notes', async (req, res) => {
   try {
     await checkLoggedin(req);
 
@@ -264,15 +259,13 @@ app.post(API_URL + '/project/update-notes', async (req, res) => {
 /**
  * Usage: Update project's info
  * method: POST
- * params: pid -project id
- *         newValues - column to update (name, owner, status, start_date,
- *                     end_date, overview)
- *         (If any of the fields are provided, the original value will be
- *          overwritten. Not provided fields will remain the same)
+ * params: pid - project id
+ *         newValues - { name, owner, status, start_date, end_date, overview }
+ *                     (not null values will be used to overwritten value in db)
  * return: 1. If success, end with status code 200
  *         2. If failed, end with status code 401 with error message
  */
-app.post(API_URL + '/project/update-project', async (req,res) => {
+app.post(API_URL + '/update-project', async (req, res) => {
   try {
     await checkLoggedin(req);
 
@@ -284,12 +277,76 @@ app.post(API_URL + '/project/update-project', async (req,res) => {
   }
 });
 
+/**
+ * Usage: Edit the bug's information
+ * method: POST
+ * params: pid - project id
+ *         bid - bug id
+ *         newValues - { title, description, status, due_date, severity }
+ *                     (not null values will be used to overwritten value in db)
+ * return: 1. If success, end with status code 200
+ *         2. If failed, end with status code 401 with error message
+ */
+app.post(API_URL + '/edit-bug', async (req, res) => {
+  try {
+    await checkLoggedin(req);
+
+    const { bid, newValues } = req.body;
+    await editBug(req.session.username, bid, newValues);
+    res.end();
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+/**
+ * usage: Post to comment to a bug
+ * method: POST
+ * params: bid - bug id
+ *         comment - comment message
+ * return: 1. If success, end with status code 200.
+ *         2. If failed, end with status code 401 with error message
+ */
+app.post(API_URL + '/comment-bug', async (req, res) => {
+  try {
+    await checkLoggedin(req);
+
+    const { bid, comment } = req.body;
+    await commentBug(req.session.username, bid, comment);
+    res.end();
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+
+/**
+ * Usage: Get bug's information
+ * method: GET
+ * params: pid - project id
+ *         bid - bug id
+ * return: 1. If success, return JSON in format:
+ *            { title, description, status, due_date, severity }
+ *         2. If failed, end with status code 401 with error message
+ */
+app.get(API_URL + '/get-bug-info', async (req, res) => {
+  try {
+    await checkLoggedin(req);
+
+    const { bid } = req.query;
+    let result = await getBugInfo(req.session.username, bid);
+    res.json(result);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
 function handleError(error, res) {
   if (typeof error === 'string') {
     // Promise been rejected
     res.status(401).send(error);
   } else {
-    console.log(error.message);
+    console.log(error);
     res.status(500).send('Internal Server Error. Please try agin later.');
   }
 }

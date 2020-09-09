@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // @material-ui
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -26,7 +26,8 @@ import {
 } from '@material-ui/pickers';
 import { createMuiTheme } from "@material-ui/core";
 import { ThemeProvider } from "@material-ui/styles";
-// widgets
+// utils
+import ReactHtmlParser from 'react-html-parser';
 import moment from 'moment';
 import MomentUtils from "@date-io/moment";
 import CKEditor from '@ckeditor/ckeditor5-react';
@@ -37,6 +38,7 @@ import CardHeader from "components/Card/CardHeader.js";
 import Language from "@material-ui/icons/Language";
 import CardIcon from "components/Card/CardIcon.js";
 import CardBody from 'components/Card/CardBody';
+import CustomButton from "components/CustomButtons/Button.js";
 // css
 import 'assets/css/popup.css';
 
@@ -69,8 +71,17 @@ const useStyles = makeStyles((theme) => ({
     width: '60%',
     marginLeft: '82px',
   },
+  newComment: {
+    padding: '0.9375rem 20px 0px 20px'
+  },
+  newCommentHeader: {
+    height: 0
+  },
   userIcon: {
     marginLeft: '-82px'
+  },
+  tools: {
+    textAlign: 'right'
   }
 }));
 
@@ -89,24 +100,125 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
+// global variable
+let refresh = false;
+
 export default function EditBug(props) {
-  const { editBugOpen, setEditBugOpen } = props;
+  const { bid, setEditBugOpen, showPopupMessage } = props;
   const classes = useStyles();
 
   // states
-  const [title, setTitle] = useState('This is a bug title');
-  const [severity, setSeverity] = useState(0);
-  const [status, setStatus] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(moment());
-  const [description, setDescription] = useState('Some sort of description');
+  const [createdDate, setCreatedDate] = useState();
+  const [reporter, setReporter] = useState();
+  const [title, setTitle] = useState('');
+  const [severity, setSeverity] = useState(-1);
+  const [status, setStatus] = useState(-1);
+  const [dueDate, setDueDate] = useState();
+  const [description, setDescription] = useState();
+  const [newComment, setNewComment] = useState();
+  const [comments, setComments] = useState([]);
 
   // functions
   const handleClose = () => {
-    setEditBugOpen(false);
+    if (refresh) 
+      window.location.reload();
+    else 
+      setEditBugOpen(false);
   };
 
+  const postNewComment = () => {
+    fetch('/api/comment-bug', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        bid,
+        comment: newComment
+      })
+    })
+      .then(res => {
+        if (!res.ok)
+          throw new Error('Cannot connect to server');
+        showPopupMessage('Post comment successful', 'success');
+      })
+      .catch(error => {
+        showPopupMessage(error.message, 'danger');
+      });
+
+    fetch('/api/logged-in-username')
+      .then(res => res.username)
+      .then(username => {
+        let c = {
+          creator: username,
+          comment: ReactHtmlParser(newComment),
+          created_date: moment().format('MM-DD-YYYY')
+        }
+        setComments([c, ...comments]);
+        setNewComment('');
+      });
+  }
+
+  const saveChanges = () => {
+    fetch('/api/edit-bug', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        bid,
+        newValues: {
+          title,
+          severity,
+          status,
+          due_date: dueDate.format('YYYY-MM-DD'),
+          description
+        }
+      })
+    })
+      .then(res => {
+        if (!res.ok)
+          throw new Error('Cannot save changes');
+        showPopupMessage('Save successful', 'success');
+        refresh = true;
+      })
+      .catch(error => {
+        showPopupMessage(error.message, 'danger')
+      });
+  }
+
+  // initialize
+  useEffect(() => {
+    fetch('/api/get-bug-info?' + new URLSearchParams({ bid }))
+      .then(res => {
+        if (!res.ok)
+          throw new Error('Cannot connect to the server');
+        return res;
+      })
+      .then(res => res.json())
+      .then(json => {
+        setCreatedDate(moment(json.created_date).format('MM-DD-YYYY'));
+        setReporter(json.reporter);
+        setTitle(json.title);
+        setDescription(json.description);
+        setSeverity(json.severity);
+        setStatus(json.status);
+        setDueDate(moment(json.due_date));
+
+        // reformat comment created dates
+        json.comments.forEach(row => {
+          row['created_date'] = moment(row['created_date']).format('MM-DD-YYYY');
+          row['comment'] = ReactHtmlParser(row['comment']);
+        });
+        setComments(json.comments)
+      })
+      .catch(error => {
+        showPopupMessage(error.message, 'danger');
+      })
+  }, []);
+
   return (
-    <Dialog fullScreen open={editBugOpen} onClose={handleClose} TransitionComponent={Transition}>
+    <Dialog fullScreen open={true} onClose={handleClose} TransitionComponent={Transition}>
       <AppBar className={classes.appBar}>
           <Toolbar>
           <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
@@ -115,7 +227,7 @@ export default function EditBug(props) {
           <Typography variant="h6" className={classes.title}>
               Edit bug
           </Typography>
-          <Button autoFocus color="inherit" onClick={handleClose}>
+          <Button autoFocus color="inherit" onClick={saveChanges}>
               Save Changes
           </Button>
           </Toolbar>
@@ -135,7 +247,7 @@ export default function EditBug(props) {
                 }
               }}
             />
-            <p className={`${classes.content} ${classes.container}`}>Created by USERNAME on 12-12-2020</p>
+            <p className={`${classes.content} ${classes.container}`}>Created by {reporter} on {createdDate}</p>
             <Divider />
           </Grid>
           <Grid item xs={12} sm={12} md={12} className={classes.container}>
@@ -146,7 +258,7 @@ export default function EditBug(props) {
               onChange={(event, editor) => setDescription(editor.getData())}
               config={{         
                 toolbar: [
-                  'heading', '|', 'bold', 'italic', 'blockQuote', 'highlight', '|', 'numberedList',
+                  'heading', '|', 'bold', 'italic', 'blockQuote', '|', 'numberedList',
                   'bulletedList', 'insertTable', '|', 'undo', 'redo'
                 ],
               }}
@@ -168,8 +280,8 @@ export default function EditBug(props) {
                           format="MM-DD-YYYY"
                           margin="normal"
                           id="date-picker-inline"
-                          value={selectedDate}
-                          onChange={setSelectedDate}
+                          value={dueDate}
+                          onChange={setDueDate}
                           KeyboardButtonProps={{
                               'aria-label': 'change date',
                             }}
@@ -215,21 +327,47 @@ export default function EditBug(props) {
           </Grid>
           <Grid item xs={12} sm={12} md={12} className={classes.container}>
             <h4><strong>Comments</strong></h4>
-             <Card className={classes.comment}>
-              <CardHeader color="rose" icon>
+            <Card className={classes.comment}>
+              <CardHeader color="rose" icon className={classes.newCommentHeader}>
                 <CardIcon color="rose" className={classes.userIcon}>
                   <Language />
                 </CardIcon>
-                <p className={classes.subTitle}>
-                  <strong>Timmy</strong> <span className={classes.grey}>commented on 12-12-2020</span>
-                </p>
               </CardHeader>
-              <CardBody>
-                The place is close to Barceloneta Beach and bus stop just 2 min by
-                walk and near to "Naviglio" where you can enjoy the main night
-                life in Barcelona...
+              <CardBody className={classes.newComment}>
+                <CKEditor
+                  data={newComment}
+                  editor={ ClassicEditor }
+                  onChange={(event, editor) => setNewComment(editor.getData())}
+                  config={{         
+                    toolbar: [
+                      'heading', '|', 'bold', 'italic', 'blockQuote', '|', 'numberedList',
+                      'bulletedList', 'insertTable', '|', 'undo', 'redo'
+                    ],
+                  }}
+                />
+                <div className={classes.tools}>
+                  <CustomButton type="button" color="default" onClick={() => setNewComment('')}>Clear</CustomButton>
+                  <CustomButton type="button" color="success" onClick={postNewComment}>Post</CustomButton>
+                </div>
               </CardBody>
             </Card>
+            {
+              comments.map((row, index) => {
+                return (
+                  <Card key={index} className={classes.comment}>
+                    <CardHeader color="rose" icon>
+                      <CardIcon color="rose" className={classes.userIcon}>
+                        <Language />
+                      </CardIcon>
+                      <p className={classes.subTitle}>
+                        <strong>{row.creator}</strong> <span className={classes.grey}>commented on {row.created_date}</span>
+                      </p>
+                    </CardHeader>
+                    <CardBody>{row.comment}</CardBody>
+                  </Card>
+                )
+              })
+            }
           </Grid>
         </Grid>
       </DialogContent>

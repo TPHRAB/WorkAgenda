@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 // @material-ui
 import Chip from '@material-ui/core/Chip';
 // widgets
@@ -31,12 +31,13 @@ const rows = [
 
 export default function BugReport(props) {
   // states
-  const [createBugOpen, setCreateBugOpen] = React.useState(false);
-  const [editBugOpen, setEditBugOpen] = React.useState(false);
-  const [rows, setRows] = React.useState([]);
+  const [createBugOpen, setCreateBugOpen] = useState(false);
+  const [editBugOpen, setEditBugOpen] = useState(false);
+  const [rows, setRows] = useState([]);
+  const [selectedBid, setSelectedBid] = useState();
   // functions
   const createBug = (data) => {
-    fetch('/api/project/create-bug', {
+    fetch('/api/create-bug', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -54,11 +55,12 @@ export default function BugReport(props) {
 
   const handleClick = (bid) => {
     setEditBugOpen(true);
+    setSelectedBid(bid);
   }
 
   // initialize
-  React.useEffect(() => {
-    fetch('/api/project/get-bugs?' + new URLSearchParams({ pid: props.match.params.pid }))
+  useEffect(() => {
+    fetch('/api/get-bugs?' + new URLSearchParams({ pid: props.match.params.pid }))
       .then(res => res.json())
       .then(obj => {
         obj.forEach(row => {
@@ -74,7 +76,10 @@ export default function BugReport(props) {
   return (
     <>
       <NewBug createBugOpen={createBugOpen} setCreateBugOpen={setCreateBugOpen} createBug={createBug} />
-      <EditBug editBugOpen={editBugOpen} setEditBugOpen={setEditBugOpen} />
+
+      { editBugOpen && 
+          <EditBug setEditBugOpen={setEditBugOpen} bid={selectedBid} showPopupMessage={props.showPopupMessage} /> }
+
       <div style={{display: 'flex', justifyContent: 'space-between'}}>
         <span
           style={{

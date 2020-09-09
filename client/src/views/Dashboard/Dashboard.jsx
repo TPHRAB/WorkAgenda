@@ -59,9 +59,9 @@ export default function Dadhboard(props) {
     let params = new FormData();
     params.append('pid', pid);
     params.append('notes', JSON.stringify(notes));
-    fetch('/api/project/update-notes', { method: 'POST', body: params })
+    fetch('/api/update-notes', { method: 'POST', body: params })
       .then(res => {
-        if (!res.ok) props.setMessage('Server error');
+        if (!res.ok) props.showPopupMessage('Server error', 'danger');
       })
     setNotes(notes);
   }
@@ -69,7 +69,7 @@ export default function Dadhboard(props) {
   const syncOverview = () => {
     setEditorState(false);
     setDescription(tempOverview);
-    fetch('/api/project/update-project', {
+    fetch('/api/update-project', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -84,7 +84,7 @@ export default function Dadhboard(props) {
   }
 
   React.useEffect(() => {
-    fetch('/api/project/dashboard?' + new URLSearchParams({ pid }))
+    fetch('/api/dashboard?' + new URLSearchParams({ pid }))
       .then(res => res.json())
       .then(json => {
         // fill overview

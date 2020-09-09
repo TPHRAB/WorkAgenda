@@ -11,9 +11,10 @@ export default class Protector extends React.Component {
   }
 
   componentDidMount() {
-    fetch('/api/isLoggedIn')
-      .then(res => {
-        if (res.ok) {
+    fetch('/api/logged-in-username')
+      .then(res => res.text())
+      .then(username => {
+        if (username) {
           this.setState({loading: false});
         } else {
           this.setState({loading: false, authFailed: true});
