@@ -20,6 +20,7 @@ import TableRow from '@material-ui/core/TableRow';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
@@ -35,10 +36,10 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 // core
 import Card from 'components/Card/Card';
 import CardHeader from "components/Card/CardHeader.js";
-import Language from "@material-ui/icons/Language";
 import CardIcon from "components/Card/CardIcon.js";
 import CardBody from 'components/Card/CardBody';
 import CustomButton from "components/CustomButtons/Button.js";
+import DeleteAlert from 'components/DeleteAlert/DeleteAlert';
 // css
 import 'assets/css/popup.css';
 
@@ -78,10 +79,17 @@ const useStyles = makeStyles((theme) => ({
     height: 0
   },
   userIcon: {
-    marginLeft: '-82px'
+    marginLeft: '-92px'
   },
   tools: {
     textAlign: 'right'
+  },
+  titleRow: {
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
+  commentButton: {
+    padding: 0
   }
 }));
 
@@ -108,6 +116,7 @@ export default function EditBug(props) {
   const classes = useStyles();
 
   // states
+  const [username, setUsername] = useState();
   const [createdDate, setCreatedDate] = useState();
   const [reporter, setReporter] = useState();
   const [title, setTitle] = useState('');
@@ -117,6 +126,7 @@ export default function EditBug(props) {
   const [description, setDescription] = useState();
   const [newComment, setNewComment] = useState();
   const [comments, setComments] = useState([]);
+  const [showAlert, setShowAlert] = useState(false);
 
   // functions
   const handleClose = () => {
@@ -125,6 +135,18 @@ export default function EditBug(props) {
     else 
       setEditBugOpen(false);
   };
+
+  const deleteBug = () => {
+    fetch('/api/delete-bug?' + new URLSearchParams({ bid }))
+      .then(res => {
+        if (!res.ok)
+          throw new Error('Cannot delete bug');
+        window.location.reload();
+      })
+      .catch(error => {
+        showPopupMessage(error.message, 'danger')
+      });
+  }
 
   const postNewComment = () => {
     fetch('/api/comment-bug', {
@@ -141,22 +163,22 @@ export default function EditBug(props) {
         if (!res.ok)
           throw new Error('Cannot connect to server');
         showPopupMessage('Post comment successful', 'success');
+        return res;
       })
-      .catch(error => {
-        showPopupMessage(error.message, 'danger');
-      });
-
-    fetch('/api/logged-in-username')
-      .then(res => res.username)
-      .then(username => {
+      .then(res => res.text())
+      .then(cid => {
         let c = {
+          cid,
           creator: username,
           comment: ReactHtmlParser(newComment),
           created_date: moment().format('MM-DD-YYYY')
         }
         setComments([c, ...comments]);
         setNewComment('');
-      });
+      })
+      .catch(error => {
+        showPopupMessage(error.message, 'danger');
+      })
   }
 
   const saveChanges = () => {
@@ -185,42 +207,71 @@ export default function EditBug(props) {
       .catch(error => {
         showPopupMessage(error.message, 'danger')
       });
+    refresh = true;
+  }
+
+  const deleteComment = (cid) => {
+    console.log(refresh)
+    fetch('/api/delete-comment?' + new URLSearchParams({ cid }))
+      .then(res => {
+        if (!res.ok)
+          throw new Error('Cannot delete comment');
+        showPopupMessage('Delete successful', 'success');
+        setComments(comments.filter(c => c.cid !== cid));
+      })
+      .catch(error => {
+        showPopupMessage(error.message, 'danger')
+      });
   }
 
   // initialize
   useEffect(() => {
-    fetch('/api/get-bug-info?' + new URLSearchParams({ bid }))
-      .then(res => {
-        if (!res.ok)
-          throw new Error('Cannot connect to the server');
-        return res;
-      })
-      .then(res => res.json())
-      .then(json => {
-        setCreatedDate(moment(json.created_date).format('MM-DD-YYYY'));
-        setReporter(json.reporter);
-        setTitle(json.title);
-        setDescription(json.description);
-        setSeverity(json.severity);
-        setStatus(json.status);
-        setDueDate(moment(json.due_date));
+    setTimeout(() => {
+      fetch('/api/get-bug-info?' + new URLSearchParams({ bid }))
+        .then(res => {
+          if (!res.ok)
+            throw new Error('Cannot connect to the server');
+          return res;
+        })
+        .then(res => res.json())
+        .then(json => {
+          setCreatedDate(moment(json.created_date).format('MM-DD-YYYY'));
+          setReporter(json.reporter);
+          setTitle(json.title);
+          setDescription(json.description);
+          setSeverity(json.severity);
+          setStatus(json.status);
+          setDueDate(moment(json.due_date));
+          // reformat comment created dates
+          json.comments.forEach(row => {
+            row['created_date'] = moment(row['created_date']).format('MM-DD-YYYY');
+            row['comment'] = ReactHtmlParser(row['comment']);
+          });
+          setComments(json.comments)
+        })
+        .catch(error => {
+          showPopupMessage(error.message, 'danger');
+        })
 
-        // reformat comment created dates
-        json.comments.forEach(row => {
-          row['created_date'] = moment(row['created_date']).format('MM-DD-YYYY');
-          row['comment'] = ReactHtmlParser(row['comment']);
-        });
-        setComments(json.comments)
-      })
-      .catch(error => {
-        showPopupMessage(error.message, 'danger');
-      })
+      // wait some time to do the next request
+      setTimeout(() => {
+        fetch('/api/logged-in-username')
+          .then(res => res.text())
+          .then(username => setUsername(username));
+      },100);
+
+    }, 150); // wait for the slide to finish transition
   }, []);
 
   return (
     <Dialog fullScreen open={true} onClose={handleClose} TransitionComponent={Transition}>
+      <DeleteAlert
+        showAlert={showAlert}
+        setShowAlert={setShowAlert}
+        agree={deleteBug}
+      />
       <AppBar className={classes.appBar}>
-          <Toolbar>
+        <Toolbar>
           <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
               <CloseIcon />
           </IconButton>
@@ -230,24 +281,31 @@ export default function EditBug(props) {
           <Button autoFocus color="inherit" onClick={saveChanges}>
               Save Changes
           </Button>
-          </Toolbar>
+        </Toolbar>
       </AppBar>
       <DialogContent>
+        <Button onClick={() => refresh = true}>1</Button>
+        <Button onClick={() => console.log(refresh)}>2</Button>
         <Grid container>
           <Grid item xs={12} sm={12} md={12}>
-            <TextField
-              margin="dense"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              className={classes.bugTitle}
-              variant="outlined"
-              InputProps={{
-                classes: {
-                  input: classes.resize
-                }
-              }}
-            />
-            <p className={`${classes.content} ${classes.container}`}>Created by {reporter} on {createdDate}</p>
+            <div className={classes.titleRow}>
+              <TextField
+                margin="dense"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                className={classes.bugTitle}
+                variant="outlined"
+                InputProps={{
+                  classes: {
+                    input: classes.resize
+                  }
+                }}
+              />
+              <CustomButton type="button" color="danger" onClick={() => {setShowAlert(true)}}>Delete Bug</CustomButton>
+            </div>
+            <p className={`${classes.content} ${classes.container}`}>
+              Created by <strong>{reporter}</strong> on {createdDate}
+            </p>
             <Divider />
           </Grid>
           <Grid item xs={12} sm={12} md={12} className={classes.container}>
@@ -328,9 +386,9 @@ export default function EditBug(props) {
           <Grid item xs={12} sm={12} md={12} className={classes.container}>
             <h4><strong>Comments</strong></h4>
             <Card className={classes.comment}>
-              <CardHeader color="rose" icon className={classes.newCommentHeader}>
-                <CardIcon color="rose" className={classes.userIcon}>
-                  <Language />
+              <CardHeader color="info" icon className={classes.newCommentHeader}>
+                <CardIcon color="info" className={classes.userIcon}>
+                  <AccountCircleIcon />
                 </CardIcon>
               </CardHeader>
               <CardBody className={classes.newComment}>
@@ -352,17 +410,29 @@ export default function EditBug(props) {
               </CardBody>
             </Card>
             {
-              comments.map((row, index) => {
+              comments.map((row) => {
                 return (
-                  <Card key={index} className={classes.comment}>
-                    <CardHeader color="rose" icon>
-                      <CardIcon color="rose" className={classes.userIcon}>
-                        <Language />
+                  <Card key={row.cid} className={classes.comment}>
+                    <CardHeader color="info" icon>
+                      <CardIcon color="info" className={classes.userIcon}>
+                        <AccountCircleIcon />
                       </CardIcon>
-                      <p className={classes.subTitle}>
-                        <strong>{row.creator}</strong> <span className={classes.grey}>commented on {row.created_date}</span>
+                      <p className={classes.titleRow}>
+                        <span className={classes.subTitle}>
+                          <strong>{row.creator}</strong> <span className={classes.grey}>commented on {row.created_date}</span>
+                        </span>
+                        {
+                          username === row.creator && 
+                            <Button
+                              color="secondary"
+                              size="small"
+                              className={classes.commentButton}
+                              onClick={() => deleteComment(row.cid)}
+                            >
+                              Delete</Button>
+                        }
                       </p>
-                    </CardHeader>
+                   </CardHeader>
                     <CardBody>{row.comment}</CardBody>
                   </Card>
                 )

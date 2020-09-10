@@ -58,6 +58,7 @@ CREATE TABLE bugs (
 );
 
 CREATE TABLE comments (
+  cid INTEGER PRIMARY KEY AUTOINCREMENT,
   creator varchar(255),
   bid INTEGER,
   comment TEXT,

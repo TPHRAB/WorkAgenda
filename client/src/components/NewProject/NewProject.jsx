@@ -7,27 +7,59 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from "components/CustomButtons/Button.js";
 import Divider from '@material-ui/core/Divider';
+import {
+  MuiPickersUtilsProvider,
+  KeyboardDatePicker,
+} from '@material-ui/pickers';
+import { createMuiTheme } from "@material-ui/core";
+import { ThemeProvider } from "@material-ui/styles";
 // core
 import GridContainer from 'components/Grid/GridContainer';
 import GridItem from 'components/Grid/GridItem';
-// widget
+// utils
+import moment from 'moment';
+import MomentUtils from "@date-io/moment";
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { useForm } from 'react-hook-form';
 // css
 import 'assets/css/popup.css';
+import { useState } from 'react';
+
+
+const materialTheme = createMuiTheme({
+  overrides: {
+    MuiFormControl: {
+      marginNormal: {
+        marginTop: '0px',
+        paddingTop: '10.5px'
+      }
+    }
+  }
+});
+
+// global varible
+let overview = "";
 
 export default function NewProject(props) {
   const { popupOpen, setPopupOpen, createProject } = props
   const { register, handleSubmit } = useForm();
-  let overview = "";
+
+  // states
+  const [startDate, setStartDate] = useState(moment());
+  const [endDate, setEndDate] = useState(moment());
 
   const handleClose = () => {
     setPopupOpen(false);
   }
 
   const onSubmit = (data) => {
-    createProject({overview, ...data});
+    createProject({
+      overview,
+      start_date: startDate.format('YYYY-MM-DD'),
+      end_date: endDate.format('YYYY-MM-DD'),
+      ...data
+    });
   }
 
   return (
@@ -61,23 +93,47 @@ export default function NewProject(props) {
               </GridItem>
               <GridItem className="increase-bottom-margin" xs={12} sm={12} md={6}>
                 <b>Start Date</b>
-                <TextField
-                  margin="dense"
-                  name="start_date"
-                  fullWidth
-                  variant="outlined"
-                  inputRef={register}
-                />
+                <ThemeProvider theme={materialTheme}>
+                  <MuiPickersUtilsProvider utils={MomentUtils}>
+                    <KeyboardDatePicker
+                      disableToolbar
+                      autoOk
+                      variant="inline"
+                      format="MM-DD-YYYY"
+                      margin="normal"
+                      id="date-picker-inline"
+                      value={startDate}
+                      onChange={setStartDate}
+                      KeyboardButtonProps={{
+                          'aria-label': 'change date',
+                        }}
+                      inputVariant="outlined"
+                      size="small"
+                    />
+                  </MuiPickersUtilsProvider>
+                </ThemeProvider>
               </GridItem>
               <GridItem className="increase-bottom-margin" xs={12} sm={12} md={6}>
                 <b>End Date</b>
-                <TextField
-                  margin="dense"
-                  name="end_date"
-                  fullWidth
-                  variant="outlined"
-                  inputRef={register}
-                />
+                <ThemeProvider theme={materialTheme}>
+                  <MuiPickersUtilsProvider utils={MomentUtils}>
+                    <KeyboardDatePicker
+                      disableToolbar
+                      autoOk
+                      variant="inline"
+                      format="MM-DD-YYYY"
+                      margin="normal"
+                      id="date-picker-inline"
+                      value={endDate}
+                      onChange={setEndDate}
+                      KeyboardButtonProps={{
+                          'aria-label': 'change date',
+                        }}
+                      inputVariant="outlined"
+                      size="small"
+                    />
+                  </MuiPickersUtilsProvider>
+                </ThemeProvider>
               </GridItem>
               <GridItem xs={12} sm={12} md={12}>
                 <b className="increase-bottom-margin">Project Overview</b>

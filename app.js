@@ -8,7 +8,8 @@ const express = require('express'),
   { login, register, updateNotes } = require('./lib/user'),
   { createProject, getProjects, getProjectInfo,
     updateProjectInfo } = require('./lib/project'),
-  { createBug, getBugs, editBug, getBugInfo, commentBug } = require('./lib/bugs');
+  { createBug, getBugs, editBug, getBugInfo, deleteBug } = require('./lib/bug'),
+  { commentBug, deleteComment } = require('./lib/comment');
 
 // initialize server
 const PORT = process.env.port || 3001;
@@ -114,10 +115,10 @@ app.get(API_URL + '/logged-in-username', async (req, res) => {
  */
 app.get(API_URL + '/get-projects', async (req, res) => {
   try {
-    await checkLoggedin(req);
+    let username = await checkLoggedin(req);
 
     // if logged in
-    let result = await getProjects(req.session.username);
+    let result = await getProjects(username);
 
     res.json(result);
   } catch (error) {
@@ -134,11 +135,11 @@ app.get(API_URL + '/get-projects', async (req, res) => {
  */
 app.post(API_URL + '/create-project', async (req, res) => {
   try {
-    await checkLoggedin(req);
+    let username = await checkLoggedin(req);
 
     // if logged in
     const {name, start_date, end_date, overview} = req.body;
-    await createProject(req.session.username, name, start_date,
+    await createProject(username, name, start_date,
                   end_date, overview);
 
     res.end();
@@ -161,10 +162,10 @@ app.post(API_URL + '/create-project', async (req, res) => {
  */
 app.post(API_URL + '/create-bug', async (req, res) => {
   try {
-    await checkLoggedin(req);
+    let username = await checkLoggedin(req);
 
     const {title, description, due_date, severity, pid} = req.body;
-    await createBug(req.session.username, title,
+    await createBug(username, title,
                     description, due_date, severity, pid);
     res.end();
   } catch (error) {
@@ -186,9 +187,9 @@ app.post(API_URL + '/create-bug', async (req, res) => {
  */
 app.get(API_URL + '/get-bugs', async (req, res) => {
   try {
-    await checkLoggedin(req);
+    let username = await checkLoggedin(req);
 
-    let result = await getBugs(req.session.username, req.query.pid);
+    let result = await getBugs(username, req.query.pid);
 
     res.json(result);
   } catch (error) {
@@ -227,9 +228,9 @@ app.get(API_URL + '/get-bugs', async (req, res) => {
  */
 app.get(API_URL + '/dashboard', async (req, res) => {
   try {
-    await checkLoggedin(req);
+    let username = await checkLoggedin(req);
 
-    let result = await getProjectInfo(req.session.username, req.query.pid);
+    let result = await getProjectInfo(username, req.query.pid);
     res.json(result);
   } catch (error) {
     handleError(error, res);
@@ -246,10 +247,10 @@ app.get(API_URL + '/dashboard', async (req, res) => {
  */
 app.post(API_URL + '/update-notes', async (req, res) => {
   try {
-    await checkLoggedin(req);
+    let username = await checkLoggedin(req);
 
     const {pid, notes} = req.body;
-    await updateNotes(req.session.username, pid, notes);
+    await updateNotes(username, pid, notes);
     res.end();
   } catch (error) {
     handleError(error, res);
@@ -267,10 +268,10 @@ app.post(API_URL + '/update-notes', async (req, res) => {
  */
 app.post(API_URL + '/update-project', async (req, res) => {
   try {
-    await checkLoggedin(req);
+    let username = await checkLoggedin(req);
 
     const {pid, newValues} = req.body;
-    await updateProjectInfo(req.session.username, pid, newValues);
+    await updateProjectInfo(username, pid, newValues);
     res.end();
   } catch (error) {
     handleError(error, res);
@@ -289,10 +290,10 @@ app.post(API_URL + '/update-project', async (req, res) => {
  */
 app.post(API_URL + '/edit-bug', async (req, res) => {
   try {
-    await checkLoggedin(req);
+    let username = await checkLoggedin(req);
 
     const { bid, newValues } = req.body;
-    await editBug(req.session.username, bid, newValues);
+    await editBug(username, bid, newValues);
     res.end();
   } catch (error) {
     handleError(error, res);
@@ -309,11 +310,11 @@ app.post(API_URL + '/edit-bug', async (req, res) => {
  */
 app.post(API_URL + '/comment-bug', async (req, res) => {
   try {
-    await checkLoggedin(req);
+    let username = await checkLoggedin(req);
 
     const { bid, comment } = req.body;
-    await commentBug(req.session.username, bid, comment);
-    res.end();
+    let cid = await commentBug(username, bid, comment);
+    res.send('' + cid);
   } catch (error) {
     handleError(error, res);
   }
@@ -331,11 +332,50 @@ app.post(API_URL + '/comment-bug', async (req, res) => {
  */
 app.get(API_URL + '/get-bug-info', async (req, res) => {
   try {
-    await checkLoggedin(req);
+    let username = await checkLoggedin(req);
 
     const { bid } = req.query;
-    let result = await getBugInfo(req.session.username, bid);
+    let result = await getBugInfo(username, bid);
     res.json(result);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+/**
+ * Usage: delete a bug
+ * Method: GET
+ * params: bid - bug id
+ * return: 1. If success, end with status code 200
+ *         2. If failed, end with status code 401 with error message
+ */
+app.get(API_URL + '/delete-bug', async (req, res) => {
+  try {
+    let username = await checkLoggedin(req);
+
+    const { bid } = req.query;
+    await deleteBug(username, bid);
+    res.end();
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+/**
+ * Usage: delete a comment
+ * Method: GET
+ * Params: cid - comment id
+ * return: 1. If success, end with status code 200
+ *         2. If failed, end with status code 401 with error message
+ */
+app.get(API_URL + '/delete-comment', async (req, res) => {
+  try {
+    let username = await checkLoggedin(req);
+
+    const { cid } = req.query;
+
+    await deleteComment(username, cid);
+    res.end();
   } catch (error) {
     handleError(error, res);
   }
@@ -351,10 +391,15 @@ function handleError(error, res) {
   }
 }
 
+/**
+ * @returns {Promise} - 1. If logged in, return username
+ *                      2. If not logged in, return null
+ */
 async function checkLoggedin(req) {
-  if (!req.session.username) {
+  let username = req.session.username;
+  if (!username)
     await Promise.reject('Permission denied');
-  }
+  return username;
 }
 
 app.listen(PORT);

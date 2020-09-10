@@ -70,7 +70,7 @@ export default function Project(props) {
       setShowMessage(true);
       setMessage(message);
       setColor(color);
-    });
+    }, 100);
   }
   // initialize and destroy the PerfectScrollbar plugin
   React.useEffect(() => {
