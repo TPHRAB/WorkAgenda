@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 // @material-ui
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -40,6 +40,7 @@ import CardIcon from "components/Card/CardIcon.js";
 import CardBody from 'components/Card/CardBody';
 import CustomButton from "components/CustomButtons/Button.js";
 import DeleteAlert from 'components/DeleteAlert/DeleteAlert';
+import { ProjectContext } from 'layouts/Project';
 // css
 import 'assets/css/popup.css';
 
@@ -105,17 +106,20 @@ const materialTheme = createMuiTheme({
 });
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
+  return <Slide direction="up" ref={ref} {...props} timeout={150} />;
 });
 
 // global variable
 let refresh = false;
-
+let lastBid = null;
 export default function EditBug(props) {
-  const { bid, setEditBugOpen, showPopupMessage } = props;
+  // context
+  const { showPopupMessage } = useContext(ProjectContext);
+  const { bid, editBugOpen, setEditBugOpen } = props;
   const classes = useStyles();
 
   // states
+  const [finishLoad, setFinishLoad] = useState(false)
   const [username, setUsername] = useState();
   const [createdDate, setCreatedDate] = useState();
   const [reporter, setReporter] = useState();
@@ -132,8 +136,10 @@ export default function EditBug(props) {
   const handleClose = () => {
     if (refresh) 
       window.location.reload();
-    else 
+    else {
+      setFinishLoad(false);
       setEditBugOpen(false);
+    }
   };
 
   const deleteBug = () => {
@@ -171,7 +177,7 @@ export default function EditBug(props) {
           cid,
           creator: username,
           comment: ReactHtmlParser(newComment),
-          created_date: moment().format('MM-DD-YYYY')
+          created_date: moment().format('YYYY-MM-DD'),
         }
         setComments([c, ...comments]);
         setNewComment('');
@@ -211,7 +217,6 @@ export default function EditBug(props) {
   }
 
   const deleteComment = (cid) => {
-    console.log(refresh)
     fetch('/api/delete-comment?' + new URLSearchParams({ cid }))
       .then(res => {
         if (!res.ok)
@@ -225,46 +230,58 @@ export default function EditBug(props) {
   }
 
   // initialize
-  useEffect(() => {
+  const load = () => {
+    fetch('/api/get-bug-info?' + new URLSearchParams({ bid }))
+      .then(res => {
+        if (!res.ok)
+          throw new Error('Cannot connect to the server');
+        return res;
+      })
+      .then(res => res.json())
+      .then(json => {
+        setCreatedDate(moment(json.created_date).format('MM-DD-YYYY'));
+        setReporter(json.reporter);
+        setTitle(json.title);
+        setDescription(json.description);
+        setSeverity(json.severity);
+        setStatus(json.status);
+        setDueDate(moment(json.due_date));
+        // reformat comment created dates
+        json.comments.forEach(row => {
+          let createdDate = moment(row['created_date']);
+          if (createdDate.isSame(moment(), 'day'))
+            row['created_date'] = createdDate.format('HH:mm');
+          else
+            row['created_date'] = createdDate.format('MM-DD-YYYY');
+          row['comment'] = ReactHtmlParser(row['comment']);
+        });
+        setComments(json.comments)
+        setFinishLoad(true);
+        lastBid = bid;
+      })
+      .catch(error => {
+        showPopupMessage(error.message, 'danger');
+      })
+
+    // wait some time to do the next request
     setTimeout(() => {
-      fetch('/api/get-bug-info?' + new URLSearchParams({ bid }))
-        .then(res => {
-          if (!res.ok)
-            throw new Error('Cannot connect to the server');
-          return res;
-        })
-        .then(res => res.json())
-        .then(json => {
-          setCreatedDate(moment(json.created_date).format('MM-DD-YYYY'));
-          setReporter(json.reporter);
-          setTitle(json.title);
-          setDescription(json.description);
-          setSeverity(json.severity);
-          setStatus(json.status);
-          setDueDate(moment(json.due_date));
-          // reformat comment created dates
-          json.comments.forEach(row => {
-            row['created_date'] = moment(row['created_date']).format('MM-DD-YYYY');
-            row['comment'] = ReactHtmlParser(row['comment']);
-          });
-          setComments(json.comments)
-        })
-        .catch(error => {
-          showPopupMessage(error.message, 'danger');
-        })
+      fetch('/api/logged-in-username')
+        .then(res => res.text())
+        .then(username => setUsername(username));
+    },100);
+  }
 
-      // wait some time to do the next request
-      setTimeout(() => {
-        fetch('/api/logged-in-username')
-          .then(res => res.text())
-          .then(username => setUsername(username));
-      },100);
-
-    }, 150); // wait for the slide to finish transition
-  }, []);
+  useEffect(() => {
+    if (editBugOpen) {
+      if (bid != lastBid)
+        load();
+      else
+        setFinishLoad(true);
+    }
+  }, [bid, editBugOpen]);
 
   return (
-    <Dialog fullScreen open={true} onClose={handleClose} TransitionComponent={Transition}>
+    <Dialog fullScreen open={finishLoad && editBugOpen } onClose={handleClose} TransitionComponent={Transition}>
       <DeleteAlert
         showAlert={showAlert}
         setShowAlert={setShowAlert}
@@ -284,8 +301,6 @@ export default function EditBug(props) {
         </Toolbar>
       </AppBar>
       <DialogContent>
-        <Button onClick={() => refresh = true}>1</Button>
-        <Button onClick={() => console.log(refresh)}>2</Button>
         <Grid container>
           <Grid item xs={12} sm={12} md={12}>
             <div className={classes.titleRow}>

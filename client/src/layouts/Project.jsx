@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createContext, useEffect } from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
 // creates a beautiful scrollbar
 import PerfectScrollbar from "perfect-scrollbar";
@@ -21,30 +21,28 @@ import logo from "assets/img/reactlogo.png";
 
 let ps;
 
-const switchRoutes = (showPopupMessage) => {
-  return (
-    <Switch>
-      {dashboardRoutes.map((item, key) => {
-        if (item.layout === "/project") {
-          return (
-            <Route
-              path={item.layout + '/:pid' + item.path}
-              key={key}
-              render={(props) => {
-                return <item.component {...props} showPopupMessage={showPopupMessage} />
-              }}
-            />
-          );
-        }
-        return null;
-      })}
-    </Switch>
-  )
-};
+const switchRoutes = (
+  <Switch>
+    {dashboardRoutes.map((item, key) => {
+      if (item.layout === "/project") {
+        return (
+          <Route
+            path={item.layout + '/:pid' + item.path}
+            key={key}
+            component={item.component}
+          />
+        );
+      }
+      return null;
+    })}
+  </Switch>
+);
 
 const useStyles = makeStyles(styles);
 
-export default function Project(props) {
+const ProjectContext = createContext();
+
+function Project(props) {
   // styles
   const classes = useStyles();
   // ref to help us initialize PerfectScrollbar on windows devices
@@ -71,9 +69,10 @@ export default function Project(props) {
       setMessage(message);
       setColor(color);
     }, 100);
-  }
+  };
+
   // initialize and destroy the PerfectScrollbar plugin
-  React.useEffect(() => {
+  useEffect(() => {
     if (navigator.platform.indexOf("Win") > -1) {
       ps = new PerfectScrollbar(mainPanel.current, {
         suppressScrollX: true,
@@ -91,40 +90,44 @@ export default function Project(props) {
     };
   }, [mainPanel]);
   return (
-    <div className={classes.wrapper}>
-      <div>
-        <Snackbar
-          place="br"
-          color={color}
-          icon={AddAlert}
-          message={message}
-          open={showMessage}
-          closeNotification={() => setShowMessage(false)}
-          close
-        />
-      </div>
-      <Sidebar
-        basePath={`/project/${props.match.params.pid}`}
-        routes={dashboardRoutes}
-        logoText={"Creative Tim"}
-        logo={logo}
-        image={bgImage}
-        handleDrawerToggle={handleDrawerToggle}
-        open={mobileOpen}
-        color='blue'
-        {...props}
-      />
-      <div className={classes.mainPanel} ref={mainPanel}>
-        <Navbar
+    <ProjectContext.Provider value={{ pid: props.match.params.pid, showPopupMessage }}>
+      <div className={classes.wrapper}>
+        <div>
+          <Snackbar
+            place="br"
+            color={color}
+            icon={AddAlert}
+            message={message}
+            open={showMessage}
+            closeNotification={() => setShowMessage(false)}
+            close
+          />
+        </div>
+        <Sidebar
+          basePath={`/project/${props.match.params.pid}`}
           routes={dashboardRoutes}
+          logoText={"Creative Tim"}
+          logo={logo}
+          image={bgImage}
           handleDrawerToggle={handleDrawerToggle}
+          open={mobileOpen}
+          color='blue'
           {...props}
         />
-        <div className={classes.content}>
-          <div className={classes.container}>{switchRoutes(showPopupMessage)}</div>
+        <div className={classes.mainPanel} ref={mainPanel}>
+          <Navbar
+            routes={dashboardRoutes}
+            handleDrawerToggle={handleDrawerToggle}
+            {...props}
+          />
+          <div className={classes.content}>
+            <div className={classes.container}>{switchRoutes}</div>
+          </div>
+          <Footer />
         </div>
-        <Footer />
       </div>
-    </div>
+    </ProjectContext.Provider>
   );
 }
+
+export { Project as default, ProjectContext };

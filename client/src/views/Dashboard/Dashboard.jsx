@@ -1,5 +1,5 @@
 // react
-import React, { useState} from 'react';
+import React, { useState, useContext } from 'react';
 // material-ui
 import { makeStyles } from "@material-ui/core/styles";
 import CardHeader from "components/Card/CardHeader.js";
@@ -19,6 +19,8 @@ import EditIcon from '@material-ui/icons/Edit';
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { Pie } from 'react-chartjs-2';
+// core
+import { ProjectContext } from 'layouts/Project';
 // css
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
 
@@ -44,6 +46,8 @@ function createUpcomingWork(userIcon, title, type, message) {
 }
 
 export default function Dadhboard(props) {
+  const { pid, showPopupMessage } = useContext(ProjectContext);
+
   const classes = useStyles();
   const [description, setDescription] = useState('');
   const [showEditor, setEditorState] = useState(false);
@@ -51,7 +55,6 @@ export default function Dadhboard(props) {
   const [bugStatus, setBugStatus] = useState([]);
   const [upcomingWork, setUpcomingWork] = useState([]);
   const [notes, setNotes] = useState([]);
-  const pid = props.match.params.pid;
 
   let tempOverview;
 
@@ -61,7 +64,7 @@ export default function Dadhboard(props) {
     params.append('notes', JSON.stringify(notes));
     fetch('/api/update-notes', { method: 'POST', body: params })
       .then(res => {
-        if (!res.ok) props.showPopupMessage('Server error', 'danger');
+        if (!res.ok) showPopupMessage('Server error', 'danger');
       })
     setNotes(notes);
   }

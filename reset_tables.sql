@@ -49,7 +49,7 @@ CREATE TABLE bugs (
   reporter varchar(255),
   created_date varchar(10), -- YYYY-MM-DD
   status INTEGER DEFAULT 0, -- (0, 1) open/closed
-  due_date varchar(19), -- YYYY-MM-DD hh:mm AM/PM
+  due_date varchar(19), -- YYYY-MM-DD
   severity INTEGER, -- (0, 1, 2, 3) none/critical/major/minor
   description TEXT,
   pid INTEGER,
@@ -62,7 +62,16 @@ CREATE TABLE comments (
   creator varchar(255),
   bid INTEGER,
   comment TEXT,
-  created_date varchar(10),
+  created_date varchar(23) -- YYYY-MM-DD HH:mm:ss.SSS,
   FOREIGN KEY (creator) REFERENCES users,
   FOREIGN KEY (bid) REFERENCES bugs
+);
+
+CREATE TABLE event (
+  eid INTEGER PRIMARY KEY AUTOINCREMENT,
+  pid INTEGER,
+  title TEXT,
+  start varchar(10), -- YYYY-MM-DD HH
+  end varchar(10),
+  FOREIGN KEY (pid) REFERENCES projects
 );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 // @material-ui
 import Chip from '@material-ui/core/Chip';
 // widgets
@@ -8,6 +8,8 @@ import EnhancedTable from 'components/EnhancedTable/EnhancedTable';
 import Button from 'components/CustomButtons/Button';
 import NewBug from 'components/NewBug/NewBug';
 import EditBug from 'components/EditBug/EditBug';
+// context
+import { ProjectContext } from 'layouts/Project';
 
 const headCells = [
   { id: 'title', label: 'BUG', isLink: true },
@@ -30,28 +32,15 @@ const rows = [
 ];
 
 export default function BugReport(props) {
+  // context
+  const { pid } = useContext(ProjectContext);
+
   // states
   const [createBugOpen, setCreateBugOpen] = useState(false);
   const [editBugOpen, setEditBugOpen] = useState(false);
   const [rows, setRows] = useState([]);
   const [selectedBid, setSelectedBid] = useState();
   // functions
-  const createBug = (data) => {
-    fetch('/api/create-bug', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({pid: props.match.params.pid, ...data})
-    })
-    .then(res => {
-      if (!res.ok) {
-        props.setMessage('Server error');
-      } else {
-        window.location.reload();
-      }
-    });
-  }
 
   const handleClick = (bid) => {
     setEditBugOpen(true);
@@ -60,7 +49,7 @@ export default function BugReport(props) {
 
   // initialize
   useEffect(() => {
-    fetch('/api/get-bugs?' + new URLSearchParams({ pid: props.match.params.pid }))
+    fetch('/api/get-bugs?' + new URLSearchParams({ pid }))
       .then(res => res.json())
       .then(obj => {
         obj.forEach(row => {
@@ -75,10 +64,9 @@ export default function BugReport(props) {
 
   return (
     <>
-      <NewBug createBugOpen={createBugOpen} setCreateBugOpen={setCreateBugOpen} createBug={createBug} />
+      <NewBug createBugOpen={createBugOpen} setCreateBugOpen={setCreateBugOpen} />
 
-      { editBugOpen && 
-          <EditBug setEditBugOpen={setEditBugOpen} bid={selectedBid} showPopupMessage={props.showPopupMessage} /> }
+      <EditBug setEditBugOpen={setEditBugOpen} bid={selectedBid} editBugOpen={editBugOpen} />
 
       <div style={{display: 'flex', justifyContent: 'space-between'}}>
         <span

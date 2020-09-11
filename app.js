@@ -1,3 +1,5 @@
+const { createEvent } = require('./lib/event');
+
 // imports
 const express = require('express'),
   cookieParser = require('cookie-parser'),
@@ -376,6 +378,18 @@ app.get(API_URL + '/delete-comment', async (req, res) => {
 
     await deleteComment(username, cid);
     res.end();
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+app.post(API_URL + '/create-event', async (req, res) => {
+  try {
+    let username = await checkLoggedin(req);
+
+    const { pid, title, start, end } = req.body;
+
+    await createEvent(username, pid, title, start, end);
   } catch (error) {
     handleError(error, res);
   }

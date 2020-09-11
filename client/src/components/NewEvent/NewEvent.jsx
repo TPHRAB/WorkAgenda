@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useContext } from 'react';
+import React, { useState, useCallback } from 'react';
 // @material-ui
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -20,7 +20,6 @@ import { ThemeProvider } from "@material-ui/styles";
 // core
 import GridContainer from 'components/Grid/GridContainer';
 import GridItem from 'components/Grid/GridItem';
-import { ProjectContext } from 'layouts/Project';
 // widget
 import moment from 'moment';
 import MomentUtils from "@date-io/moment";
@@ -50,21 +49,20 @@ const materialTheme = createMuiTheme({
   }
 });
 
-export default function NewBug(props) {
-  const classes = useStyles();
+// global variable
+let description = '';
 
-  // context
-  const { createBugOpen, setCreateBugOpen } = props;
-  const { pid, showPopupMessage } = useContext(ProjectContext);
+export default function NewEvent(props) {
+  const classes = useStyles();
+  const { createEventOpen, setCreateEventOpen } = props
 
   // states
-  let description = '';
-  const [selectedDate, setSelectedDate] = React.useState(moment());
-  const [severity, setSeverity] = React.useState(0);
-  const [title, setTitle] = React.useState()
+  const [selectedDate, setSelectedDate] = useState(moment());
+  const [severity, setSeverity] = useState(0);
+  const [title, setTitle] = useState()
 
   const handleClose = () => {
-    setCreateBugOpen(false);
+    setCreateEventOpen(false);
   }
 
   const handleTitleChange = (event) => {
@@ -72,33 +70,10 @@ export default function NewBug(props) {
   }
 
   const onSubmit = () => {
-    createBug({
-      description,
-      due_date: selectedDate.format('YYYY-MM-DD'),
-      severity,
-      title
-    })
-  }
-
-  const createBug = (data) => {
-    fetch('/api/create-bug', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({pid, ...data})
-    })
-    .then(res => {
-      if (!res.ok) {
-        showPopupMessage('Server error', 'danger');
-      } else {
-        window.location.reload();
-      }
-    });
   }
 
   return (
-      <Dialog open={createBugOpen} onClose={handleClose} aria-labelledby="form-dialog-title" disableBackdropClick disableEscapeKeyDown>
+      <Dialog open={createEventOpen} onClose={handleClose} aria-labelledby="form-dialog-title" disableBackdropClick disableEscapeKeyDown>
         <DialogTitle id="form-dialog-title">New Project</DialogTitle>
         <Divider variant="middle" />
         <DialogContent>
