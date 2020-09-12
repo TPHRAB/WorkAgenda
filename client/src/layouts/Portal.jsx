@@ -55,22 +55,6 @@ export default function Portal({ history, ...rest }) {
     }
   };
   const createProject = (data) => {
-    fetch('/api/create-project', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-    .then(res => {
-      if (!res.ok) {
-        throw new Error('Server error');
-      }
-      window.location.reload();
-    })
-    .catch(err => {
-      setMessage(err.message);
-    });
   }
   // initialize and destroy the PerfectScrollbar plugin
   React.useEffect(() => {
@@ -121,7 +105,7 @@ export default function Portal({ history, ...rest }) {
         closeNotification={() => setMessage('')}
         close
       />
-      <NewProject popupOpen={popupOpen} setPopupOpen={setPopupOpen} createProject={createProject} />
+      <NewProject popupOpen={popupOpen} setPopupOpen={setPopupOpen} setMessage={setMessage} />
       <Navbar
         routes={dashboardRoutes}
         handleDrawerToggle={handleDrawerToggle}

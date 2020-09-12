@@ -6,6 +6,8 @@ DROP TABLE IF EXISTS projects;
 DROP TABLE IF EXISTS user_projects;
 DROP TABLE IF EXISTS bugs;
 DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS event;
 
 CREATE TABLE users (
     username varchar(255) NOT NULL,
@@ -62,16 +64,16 @@ CREATE TABLE comments (
   creator varchar(255),
   bid INTEGER,
   comment TEXT,
-  created_date varchar(23) -- YYYY-MM-DD HH:mm:ss.SSS,
+  created_date varchar(23), -- YYYY-MM-DD HH:mm:ss.SSS,
   FOREIGN KEY (creator) REFERENCES users,
   FOREIGN KEY (bid) REFERENCES bugs
 );
 
-CREATE TABLE event (
+CREATE TABLE events (
   eid INTEGER PRIMARY KEY AUTOINCREMENT,
   pid INTEGER,
   title TEXT,
-  start varchar(10), -- YYYY-MM-DD HH
-  end varchar(10),
+  start varchar(16), -- YYYY-MM-DD HH:mm
+  end varchar(16), -- YYYY-MM-DD HH:mm
   FOREIGN KEY (pid) REFERENCES projects
 );

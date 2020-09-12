@@ -401,8 +401,8 @@ export default function EditBug(props) {
           <Grid item xs={12} sm={12} md={12} className={classes.container}>
             <h4><strong>Comments</strong></h4>
             <Card className={classes.comment}>
-              <CardHeader color="info" icon className={classes.newCommentHeader}>
-                <CardIcon color="info" className={classes.userIcon}>
+              <CardHeader color="warning" icon className={classes.newCommentHeader}>
+                <CardIcon color="warning" className={classes.userIcon}>
                   <AccountCircleIcon />
                 </CardIcon>
               </CardHeader>

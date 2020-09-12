@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 // @material-ui
 import Chip from '@material-ui/core/Chip';
 // utils
@@ -10,47 +10,55 @@ import Card from 'components/Card/Card'
 import CardBody from 'components/Card/CardBody';
 import Button from 'components/CustomButtons/Button';
 import NewEvent from 'components/NewEvent/NewEvent';
+import { ProjectContext } from 'layouts/Project';
+import Event from 'components/Event/Event';
 import 'assets/css/schedule.css'
-
 
 const localizer = momentLocalizer(moment)
 
 const now = new Date()
 
-let myEventsList = [
-  {
-    title: 'Today',
-    start: new Date(new Date().setHours(new Date().getHours() - 3)),
-    end: new Date(new Date().setHours(new Date().getHours() + 3)),
-  },
-  {
-    title: 'Point in Time Event',
-    start: now,
-    end: now,
-  },
-]
-
 export default function Schedule() {
+  // context
+  const { pid, showPopupMessage } = useContext(ProjectContext);
 
   // states
-  const [events, setEvents] = useState(myEventsList);
+  const [selectedEvent, setSelectedEvent] = useState({});
+  const [showEvent, setShowEvent] = useState(false);
+  const [events, setEvents] = useState([]);
   const [createEventOpen, setCreateEventOpen] = useState(false);
 
-  // funcitons
-  const handleSelect = ({ start, end }) => {
-    console.log(start, end)
-    const title = window.prompt('New Event name')
-    if (title)
-      setEvents([{ start, end, title }, ...events]);
+  // functions
+  const setOnShowEvent = (event) => {
+    setSelectedEvent(event);
+    setShowEvent(true);
   }
 
   // initialize
   useEffect(() => {
-
+    fetch('/api/get-events?' + new URLSearchParams({ pid }))
+      .then(res => {
+        if (!res.ok)
+          throw new Error('Cannot connect to the server');
+        return res;
+      })
+      .then(res => res.json())
+      .then(events => {
+        events.forEach(e => {
+          e['start'] = moment(e['start']).toDate();
+          e['end'] = moment(e['end']).toDate();
+        });
+        setEvents(events);
+      })
+      .catch(error => {
+        showPopupMessage(error.message, 'danger');
+      });
   }, []);
+
 
   return (
     <>
+      <Event showEvent={showEvent} setShowEvent={setShowEvent} selectedEvent={selectedEvent} />
       <NewEvent createEventOpen={createEventOpen} setCreateEventOpen={setCreateEventOpen} />
       <div style={{display: 'flex', justifyContent: 'space-between'}}>
         <span
@@ -60,19 +68,17 @@ export default function Schedule() {
         >
           <Chip label={<b style={{ color: 'green' }}>Today's Event: 1</b>} onClick={() => {}} variant="outlined" style={{margin: '6px 5px 0px 10px'}}/>
         </span>
-        <Button type="button" color="info" onClick={() => setCreateEventOpen(true)}>Submit Bug</Button>
+        <Button type="button" color="info" onClick={() => setCreateEventOpen(true)}>Create Event</Button>
       </div>
       <Card>
         <CardBody className="max-height">
           <Calendar
-            selectable
             localizer={localizer}
             events={events}
             startAccessor="start"
             endAccessor="end"
             defaultDate={new Date()}
-            onSelectEvent={event => alert(event.title)}
-            onSelectSlot={handleSelect}
+            onSelectEvent={setOnShowEvent}
           />
         </CardBody>
       </Card>

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 // @material-ui
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -7,24 +7,20 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from "components/CustomButtons/Button.js";
 import Divider from '@material-ui/core/Divider';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   MuiPickersUtilsProvider,
-  KeyboardDatePicker,
+  KeyboardDateTimePicker
 } from '@material-ui/pickers';
 import { createMuiTheme } from "@material-ui/core";
 import { ThemeProvider } from "@material-ui/styles";
 // core
 import GridContainer from 'components/Grid/GridContainer';
 import GridItem from 'components/Grid/GridItem';
+import { ProjectContext } from 'layouts/Project';
 // widget
 import moment from 'moment';
 import MomentUtils from "@date-io/moment";
-import CKEditor from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 // css
 import 'assets/css/popup.css';
 
@@ -53,13 +49,15 @@ const materialTheme = createMuiTheme({
 let description = '';
 
 export default function NewEvent(props) {
+  // context
+  const { pid, showPopupMessage } = useContext(ProjectContext);
   const classes = useStyles();
-  const { createEventOpen, setCreateEventOpen } = props
+  const { createEventOpen, setCreateEventOpen } = props;
 
   // states
-  const [selectedDate, setSelectedDate] = useState(moment());
-  const [severity, setSeverity] = useState(0);
   const [title, setTitle] = useState()
+  const [start, setStart] = useState(moment());
+  const [end, setEnd] = useState(moment());
 
   const handleClose = () => {
     setCreateEventOpen(false);
@@ -70,16 +68,36 @@ export default function NewEvent(props) {
   }
 
   const onSubmit = () => {
+    fetch('/api/create-event', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        pid,
+        title,
+        start: start.format('YYYY-MM-DD HH:mm'),
+        end: end.format('YYYY-MM-DD HH:mm'),
+      })
+    })
+      .then(res => {
+        if (!res.ok)
+          throw new Error('Create event failed');
+        window.location.reload();
+      })
+      .catch(error => {
+        showPopupMessage(error.message, 'danger');
+      });
   }
 
   return (
       <Dialog open={createEventOpen} onClose={handleClose} aria-labelledby="form-dialog-title" disableBackdropClick disableEscapeKeyDown>
-        <DialogTitle id="form-dialog-title">New Project</DialogTitle>
+        <DialogTitle id="form-dialog-title">New Event</DialogTitle>
         <Divider variant="middle" />
         <DialogContent>
           <GridContainer className="hide-horizontal-scroll-bar">
             <GridItem className="increase-bottom-margin" xs={12} sm={12} md={12}>
-              <b>Bug Title</b>
+              <b>Title</b>
               <TextField
                 autoFocus
                 margin="dense"
@@ -88,59 +106,37 @@ export default function NewEvent(props) {
                 onChange={handleTitleChange}
               />
             </GridItem>
-            <GridItem xs={12} sm={12} md={12} className="increase-bottom-margin">
-              <b>Description</b>
-              <div className="wrapper">
-                <CKEditor
-                  editor={ ClassicEditor }
-                  onChange={(event, editor) => description = editor.getData()}
-                  config={{         
-                    toolbar: [
-                      'heading', '|', 'bold', 'italic', 'blockQuote', '|', 'numberedList',
-                      'bulletedList', 'insertTable', '|', 'undo', 'redo'
-                    ],
-                  }}
-                />
-              </div>
-            </GridItem>
             <GridItem xs={12} sm={12} md={6} className="increase-bottom-margin">
-              <b>Due date</b>
+              <b>Start</b>
               <ThemeProvider theme={materialTheme}>
                 <MuiPickersUtilsProvider utils={MomentUtils}>
-                  <KeyboardDatePicker
-                    disableToolbar
+                  <KeyboardDateTimePicker
+                    disablePast
                     autoOk
                     variant="inline"
-                    format="YYYY/MM/DD"
-                    margin="normal"
-                    id="date-picker-inline"
-                    value={selectedDate}
-                    onChange={setSelectedDate}
-                    KeyboardButtonProps={{
-                        'aria-label': 'change date',
-                      }}
-                    inputVariant="outlined"
+                    value={start}
+                    onChange={setStart}
+                    disablePast
+                    format="MM-DD-YYYY HH:mm"
                   />
                 </MuiPickersUtilsProvider>
               </ThemeProvider>
             </GridItem>
             <GridItem xs={12} sm={12} md={6} className="increase-bottom-margin">
-              <b>Severity</b>
-              <div className="wrapper">
-                <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                  <Select
-                    labelId="demo-simple-select-outlined-label"
-                    id="demo-simple-select-outlined"
-                    value={severity}
-                    onChange={(event) => setSeverity(event.target.value)}
-                  >
-                    <MenuItem value={0}>None</MenuItem>
-                    <MenuItem value={1}>Minor</MenuItem>
-                    <MenuItem value={2}>Major</MenuItem>
-                    <MenuItem value={3}>Critical</MenuItem>
-                  </Select>
-                </FormControl>
-              </div>
+              <b>End</b>
+              <ThemeProvider theme={materialTheme}>
+                <MuiPickersUtilsProvider utils={MomentUtils}>
+                  <KeyboardDateTimePicker
+                    disablePast
+                    variant="inline"
+                    autoOk
+                    value={end}
+                    onChange={setEnd}
+                    disablePast
+                    format="MM-DD-YYYY HH:mm"
+                  />
+                </MuiPickersUtilsProvider>
+              </ThemeProvider>
             </GridItem>
           </GridContainer>
         </DialogContent>

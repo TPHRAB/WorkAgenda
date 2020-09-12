@@ -42,7 +42,7 @@ const materialTheme = createMuiTheme({
 let overview = "";
 
 export default function NewProject(props) {
-  const { popupOpen, setPopupOpen, createProject } = props
+  const { popupOpen, setPopupOpen, setMessage } = props
   const { register, handleSubmit } = useForm();
 
   // states
@@ -54,11 +54,26 @@ export default function NewProject(props) {
   }
 
   const onSubmit = (data) => {
-    createProject({
-      overview,
-      start_date: startDate.format('YYYY-MM-DD'),
-      end_date: endDate.format('YYYY-MM-DD'),
-      ...data
+    fetch('/api/create-project', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        overview,
+        start_date: startDate.format('YYYY-MM-DD'),
+        end_date: endDate.format('YYYY-MM-DD'),
+        ...data
+      })
+    })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error('Server error');
+      }
+      window.location.reload();
+    })
+    .catch(err => {
+      setMessage(err.message);
     });
   }
 
@@ -97,6 +112,7 @@ export default function NewProject(props) {
                   <MuiPickersUtilsProvider utils={MomentUtils}>
                     <KeyboardDatePicker
                       disableToolbar
+                      disablePast
                       autoOk
                       variant="inline"
                       format="MM-DD-YYYY"
@@ -119,6 +135,7 @@ export default function NewProject(props) {
                   <MuiPickersUtilsProvider utils={MomentUtils}>
                     <KeyboardDatePicker
                       disableToolbar
+                      disablePast
                       autoOk
                       variant="inline"
                       format="MM-DD-YYYY"

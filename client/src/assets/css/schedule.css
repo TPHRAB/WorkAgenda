@@ -5,3 +5,7 @@
 .rbc-event {
   height: max-content !important;
 }
+
+.rbc-selected-cell {
+  background-color: rgba(0, 0, 0, 0.5);
+}

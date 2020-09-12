@@ -134,6 +134,7 @@ export default function NewBug(props) {
                 <MuiPickersUtilsProvider utils={MomentUtils}>
                   <KeyboardDatePicker
                     disableToolbar
+                    disablePast
                     autoOk
                     variant="inline"
                     format="YYYY/MM/DD"

@@ -1,4 +1,4 @@
-const { createEvent } = require('./lib/event');
+const { createEvent, getEvents, deleteEvent } = require('./lib/event');
 
 // imports
 const express = require('express'),
@@ -383,6 +383,16 @@ app.get(API_URL + '/delete-comment', async (req, res) => {
   }
 });
 
+/**
+ * Usage: Create an event
+ * Method: POST
+ * Params: pid - project id
+ *         title - event title
+ *         start - start time in format YYYY-MM-DD HH:mm
+ *         end - end time in format YYYY-MM-DD HH:mm
+ * return: 1. If success, end with status code 200
+ *         2. If failed, end with status code 401 with error message
+ */
 app.post(API_URL + '/create-event', async (req, res) => {
   try {
     let username = await checkLoggedin(req);
@@ -390,6 +400,46 @@ app.post(API_URL + '/create-event', async (req, res) => {
     const { pid, title, start, end } = req.body;
 
     await createEvent(username, pid, title, start, end);
+    res.end();
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+/**
+ * Usage: Get all events belong to the project
+ * Method: GET
+ * Params: pid - project id
+ * return: 1. If success, return JSON in format [{eid, title, start, end}, ...]
+ *         2. If failed, end with status code 401 with error message
+ */
+app.get(API_URL + '/get-events', async (req, res) => {
+  try {
+    let username = await checkLoggedin(req);
+
+    const { pid } = req.query;
+
+    let result = await getEvents(username, pid);
+    res.json(result);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+/**
+ * Usage: Delete an event
+ * Method: GET
+ * Params: eid - event id
+ * return: 1. If success, end with status code 200
+ *         2. If failed, end with status code 401 with error message
+ */
+app.get(API_URL + '/delete-event', async (req, res) => {
+  try {
+    let username = await checkLoggedin(req);
+
+    const { eid } = req.query;
+    await deleteEvent(username, eid);
+    res.end();
   } catch (error) {
     handleError(error, res);
   }
