@@ -15,12 +15,13 @@ CREATE TABLE users (
     salt int NOT NULL,
     first_name TEXT DEFAULT '',
     last_name TEXT DEFAULT '',
+    last_active_date varchar(10),
     PRIMARY KEY (username)
 );
 
 CREATE TABLE sessions (
   sid TEXT,
-  expired INTEGER, -- Date().getTime()
+  expired INTEGER,
   sess TEXT,
   PRIMARY KEY (sid)
 );

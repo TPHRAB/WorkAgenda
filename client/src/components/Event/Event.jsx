@@ -10,7 +10,6 @@ import {
   KeyboardDateTimePicker
 } from '@material-ui/pickers';
 // widget
-import moment from 'moment';
 import MomentUtils from "@date-io/moment";
 // core
 import { ProjectContext } from 'layouts/Project';

@@ -1,16 +1,13 @@
-import React from "react";
-// react plugin for creating charts
-import Icon from "@material-ui/core/Icon";
-import Danger from "components/Typography/Danger.js";
-import Warning from "@material-ui/icons/Warning";
-import PermIdentityIcon from '@material-ui/icons/PermIdentity';
-
+import React, { useContext, useEffect, useState } from "react";
 // @material-ui/core components
+import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import { makeStyles } from "@material-ui/core/styles";
 import Chip from '@material-ui/core/Chip';
-
-// core components
+// utils
+import moment from 'moment';
+// core
+import AddUser from 'components/AddUser/AddUser';
 import Button from 'components/CustomButtons/Button';
 import GridContainer from 'components/Grid/GridContainer';
 import GridItem from "components/Grid/GridItem.js";
@@ -18,15 +15,44 @@ import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardFooter from "components/Card/CardFooter.js";
 import CardIcon from "components/Card/CardIcon";
-import AddBoxIcon from '@material-ui/icons/AddBox';
+import { ProjectContext } from 'layouts/Project';
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
 
 const useStyles = makeStyles(styles);
 
 export default function Users() {
+  // context
   const classes = useStyles();
+  const { pid, showPopupMessage } = useContext(ProjectContext);
+
+  // states
+  const [addUserOpen, setAddUserOpen] = useState(false);
+  const [users, setUsers] = useState([]);
+
+  // initialize
+  useEffect(() => {
+    fetch('/api/get-project-users?' + new URLSearchParams({ pid }))
+      .then(res => {
+        if (!res.ok)
+          throw new Error('Cannot connect to the server');
+        return res;
+      })
+      .then(res => res.json())
+      .then(userInfo => {
+        userInfo.forEach(info => {
+          info['last_active_date'] = 
+            moment(info['last_active_date']).format('MM-DD-YYYY')
+        });
+        setUsers(userInfo);
+      })
+      .catch(error => {
+        showPopupMessage(error.message, 'danger');
+      })
+  }, []);
+
   return (
     <>
+      <AddUser addUserOpen={addUserOpen} setAddUserOpen={setAddUserOpen} />
       <div style={{display: 'flex', justifyContent: 'space-between'}}>
         <span
           style={{
@@ -35,30 +61,35 @@ export default function Users() {
         >
           <Chip label={<b style={{ color: 'green' }}>Active User: 1</b>} onClick={() => {}} variant="outlined" style={{margin: '6px 5px 0px 10px'}}/>
         </span>
-        <Button type="button" color="info">Add User</Button>
+        <Button type="button" color="info" onClick={() => setAddUserOpen(true)}>Add User</Button>
       </div>
       <GridContainer>
-        <GridItem xs={12} sm={12} md={3}>
-          <Card>
-            <CardHeader color="warning" stats icon>
-              <CardIcon color="warning">
-                <AccountCircleIcon />
-              </CardIcon>
-              <p className={classes.cardCategory}>
-                Developer
-              </p>
-              <h3 className={classes.cardTitle}>
-                Chenzhe Zhao
-              </h3>
-            </CardHeader>
-            <CardFooter stats>
-              <div className={classes.stats}>
-                <PermIdentityIcon />
-                  Administrator
-              </div>
-            </CardFooter>
-          </Card>
-        </GridItem>
+        {
+          users.map(user => {
+            return (
+                <GridItem key={user.username} xs={12} sm={12} md={3}>
+                  <Card>
+                    <CardHeader color="warning" stats icon>
+                      <CardIcon color="warning">
+                        <AccountCircleIcon />
+                      </CardIcon>
+                      <p className={classes.cardCategory}>
+                        {user['username']}
+                      </p>
+                      <h3 className={classes.cardTitle}>
+                        {user['first_name']} {user['last_name']}
+                      </h3>
+                    </CardHeader>
+                    <CardFooter stats>
+                      <div className={classes.stats}>
+                        Last active: {user['last_active_date']}
+                      </div>
+                    </CardFooter>
+                  </Card>
+                </GridItem>
+            )
+          })
+        }
       </GridContainer>
     </>
   );

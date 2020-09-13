@@ -7,9 +7,11 @@ const express = require('express'),
   cors = require('cors'),
   session = require('express-session'),
   SQLiteStore = require('connect-sqlite3')(session),
-  { login, register, updateNotes } = require('./lib/user'),
+  { login, register, updateNotes,
+    updateLastOnlineDate } = require('./lib/user'),
   { createProject, getProjects, getProjectInfo,
-    updateProjectInfo } = require('./lib/project'),
+    updateProjectInfo, addUserToProject,
+    getProjectUsers} = require('./lib/project'),
   { createBug, getBugs, editBug, getBugInfo, deleteBug } = require('./lib/bug'),
   { commentBug, deleteComment } = require('./lib/comment');
 
@@ -445,6 +447,46 @@ app.get(API_URL + '/delete-event', async (req, res) => {
   }
 });
 
+/**
+ * Usage: Add user to project
+ * Method: POST
+ * Params: pid - project id
+ *         newUser - new user's username
+ * Return: 1. If success, end with status code 200
+ *         2. If failed, end with status code 401 with error message
+ */
+app.post(API_URL + '/add-user', async (req, res) => {
+  try {
+    let username = await checkLoggedin(req);
+    
+    const { pid, newUser } = req.body;
+    await addUserToProject(username, pid, newUser);
+    res.end();
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+/**
+ * Usage: Get users involved in the project
+ * Method: GET
+ * Params: pid - project id
+ * Return: 1. If success, return JSON in format:
+ *            [{username, first_name, last_name}, ...]
+ *         2. If failed, end with status code 401 with error message
+ */
+app.get(API_URL + '/get-project-users', async (req, res) => {
+  try {
+    let username = await checkLoggedin(req);
+
+    const { pid } = req.query;
+    let result = await getProjectUsers(username, pid);
+    res.json(result);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
 function handleError(error, res) {
   if (typeof error === 'string') {
     // Promise been rejected
@@ -463,6 +505,9 @@ async function checkLoggedin(req) {
   let username = req.session.username;
   if (!username)
     await Promise.reject('Permission denied');
+
+  // update last logged in time
+  await updateLastOnlineDate(username);
   return username;
 }
 
