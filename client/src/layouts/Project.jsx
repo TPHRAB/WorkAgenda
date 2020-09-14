@@ -52,6 +52,7 @@ function Project(props) {
   const [showMessage, setShowMessage] = React.useState(false);
   const [message, setMessage] = React.useState('');
   const [color, setColor] = React.useState('danger');
+  const [username, setUsername] = React.useState();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -89,8 +90,16 @@ function Project(props) {
       window.removeEventListener("resize", resizeFunction);
     };
   }, [mainPanel]);
+
+  useEffect(() => {
+    // get username
+    fetch('/api/logged-in-username')
+      .then(res => res.text())
+      .then(username => setUsername(username));
+  }, []);
+
   return (
-    <ProjectContext.Provider value={{ pid: props.match.params.pid, showPopupMessage }}>
+    <ProjectContext.Provider value={{ pid: props.match.params.pid, showPopupMessage, username }}>
       <div className={classes.wrapper}>
         <div>
           <Snackbar

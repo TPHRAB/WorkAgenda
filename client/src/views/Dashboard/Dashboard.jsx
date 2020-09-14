@@ -16,6 +16,7 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import BugReportIcon from '@material-ui/icons/BugReport';
 import EditIcon from '@material-ui/icons/Edit';
 // widgets
+import ReactHtmlParser from 'react-html-parser';
 import CKEditor from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { Pie } from 'react-chartjs-2';
@@ -151,7 +152,7 @@ export default function Dadhboard(props) {
                   <Button id="editor-button" type="button" color="default" onClick={() => setEditorState(false)}>Cancel</Button>
                 </div>
               ) : (
-                <div dangerouslySetInnerHTML={{ __html: description }} />
+                <div>{ReactHtmlParser(description)}</div>
               )}
             </CardBody>
           </Card>

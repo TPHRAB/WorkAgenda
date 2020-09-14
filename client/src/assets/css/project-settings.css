@@ -1,0 +1,11 @@
+.title-field {
+  width: 20vw !important;
+}
+
+.input-field {
+  width: 50vw !important;
+}
+
+.title-field, .input-field, .center {
+  text-align: center;
+}

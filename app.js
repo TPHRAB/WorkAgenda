@@ -11,7 +11,8 @@ const express = require('express'),
     updateLastOnlineDate } = require('./lib/user'),
   { createProject, getProjects, getProjectInfo,
     updateProjectInfo, addUserToProject,
-    getProjectUsers} = require('./lib/project'),
+    getProjectUsers,
+    removeProjectUser} = require('./lib/project'),
   { createBug, getBugs, editBug, getBugInfo, deleteBug } = require('./lib/bug'),
   { commentBug, deleteComment } = require('./lib/comment');
 
@@ -472,7 +473,7 @@ app.post(API_URL + '/add-user', async (req, res) => {
  * Method: GET
  * Params: pid - project id
  * Return: 1. If success, return JSON in format:
- *            [{username, first_name, last_name}, ...]
+ *            [{username, first_name, last_name, last_active_date}, ...]
  *         2. If failed, end with status code 401 with error message
  */
 app.get(API_URL + '/get-project-users', async (req, res) => {
@@ -482,6 +483,26 @@ app.get(API_URL + '/get-project-users', async (req, res) => {
     const { pid } = req.query;
     let result = await getProjectUsers(username, pid);
     res.json(result);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+/**
+ * Usage: Remove a user from the project
+ * Method: POST
+ * Params: pid - project id
+ *         userToRemove - user to be removed from the project
+ * Return: 1. If success, end with status code 200
+ *         2. If failed, end with status code 401 with error message
+ */
+app.post(API_URL + '/remove-project-user', async (req, res) => {
+  try {
+    let username = await checkLoggedin(req);
+
+    const { pid, userToRemove } = req.body;
+    await removeProjectUser(username, pid, userToRemove);
+    res.end();
   } catch (error) {
     handleError(error, res);
   }

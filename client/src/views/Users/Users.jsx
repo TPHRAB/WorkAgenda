@@ -7,6 +7,7 @@ import Chip from '@material-ui/core/Chip';
 // utils
 import moment from 'moment';
 // core
+import ProjectUserDialog from 'components/ProjectUserDialog/ProjectUserDialog';
 import AddUser from 'components/AddUser/AddUser';
 import Button from 'components/CustomButtons/Button';
 import GridContainer from 'components/Grid/GridContainer';
@@ -17,17 +18,26 @@ import CardFooter from "components/Card/CardFooter.js";
 import CardIcon from "components/Card/CardIcon";
 import { ProjectContext } from 'layouts/Project';
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
+import 'assets/css/popup.css';
 
 const useStyles = makeStyles(styles);
 
 export default function Users() {
   // context
   const classes = useStyles();
-  const { pid, showPopupMessage } = useContext(ProjectContext);
+  const { pid, showPopupMessage, username } = useContext(ProjectContext);
 
   // states
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [users, setUsers] = useState([]);
+  const [showUser, setShowUser] = useState(false);
+  const [selectedUser, setSelectedUser] = useState({});
+
+  // functions
+  const selectUser = (userInfo) => {
+    setShowUser(true);
+    setSelectedUser(userInfo);
+  }
 
   // initialize
   useEffect(() => {
@@ -52,6 +62,7 @@ export default function Users() {
 
   return (
     <>
+      <ProjectUserDialog showUser={showUser} setShowUser={setShowUser} selectedUser={selectedUser} />
       <AddUser addUserOpen={addUserOpen} setAddUserOpen={setAddUserOpen} />
       <div style={{display: 'flex', justifyContent: 'space-between'}}>
         <span
@@ -67,26 +78,29 @@ export default function Users() {
         {
           users.map(user => {
             return (
-                <GridItem key={user.username} xs={12} sm={12} md={3}>
-                  <Card>
-                    <CardHeader color="warning" stats icon>
-                      <CardIcon color="warning">
-                        <AccountCircleIcon />
-                      </CardIcon>
-                      <p className={classes.cardCategory}>
-                        {user['username']}
-                      </p>
-                      <h3 className={classes.cardTitle}>
-                        {user['first_name']} {user['last_name']}
-                      </h3>
-                    </CardHeader>
-                    <CardFooter stats>
-                      <div className={classes.stats}>
-                        Last active: {user['last_active_date']}
-                      </div>
-                    </CardFooter>
-                  </Card>
-                </GridItem>
+              <GridItem key={user['username']} xs={12} sm={12} md={3}>
+                <Card
+                  onClick={username !== user['username'] && (() => selectUser(user))}
+                  className={ username !== user['username'] ? "clickable" : "project-owner" }
+                >
+                  <CardHeader color="warning" stats icon>
+                    <CardIcon color="warning">
+                      <AccountCircleIcon />
+                    </CardIcon>
+                    <p className={classes.cardCategory}>
+                      {user['username']}
+                    </p>
+                    <h3 className={classes.cardTitle}>
+                      {user['first_name']} {user['last_name']}
+                    </h3>
+                  </CardHeader>
+                  <CardFooter stats>
+                    <div className={classes.stats}>
+                      Last active: {user['last_active_date']}
+                    </div>
+                  </CardFooter>
+                </Card>
+              </GridItem>
             )
           })
         }

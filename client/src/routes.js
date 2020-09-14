@@ -38,6 +38,8 @@ import Schedule from 'views/Schedule/Schedule'
 import GroupIcon from '@material-ui/icons/Group';
 import Users from 'views/Users/Users';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
+import SettingsIcon from '@material-ui/icons/Settings';
+import ProjectSettings from 'views/ProjectSettings/ProjectSettings';
 
 const dashboardRoutes = [
   {
@@ -66,6 +68,13 @@ const dashboardRoutes = [
     name: "Users",
     icon: GroupIcon,
     component: Users,
+    layout: "/project"
+  },
+  {
+    path: "/project-settings",
+    name: "Settings",
+    icon: SettingsIcon,
+    component: ProjectSettings,
     layout: "/project"
   },
   {

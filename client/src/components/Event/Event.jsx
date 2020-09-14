@@ -40,7 +40,6 @@ export default function Event(props) {
   return (
     <Dialog
       open={showEvent}
-      onClose={setShowEvent}
     >
       <DialogTitle>{selectedEvent.title}</DialogTitle>
       <DialogContent>
@@ -72,7 +71,7 @@ export default function Event(props) {
           cancel
         </Button>
         <Button onClick={deleteEvent} color="secondary" autoFocus>
-          Delete
+          delete
         </Button>
       </DialogActions>
     </Dialog>

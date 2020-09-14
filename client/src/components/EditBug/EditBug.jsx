@@ -114,13 +114,12 @@ let refresh = false;
 let lastBid = null;
 export default function EditBug(props) {
   // context
-  const { showPopupMessage } = useContext(ProjectContext);
+  const { username, showPopupMessage } = useContext(ProjectContext);
   const { bid, editBugOpen, setEditBugOpen } = props;
   const classes = useStyles();
 
   // states
   const [finishLoad, setFinishLoad] = useState(false)
-  const [username, setUsername] = useState();
   const [createdDate, setCreatedDate] = useState();
   const [reporter, setReporter] = useState();
   const [title, setTitle] = useState('');
@@ -262,13 +261,6 @@ export default function EditBug(props) {
       .catch(error => {
         showPopupMessage(error.message, 'danger');
       })
-
-    // wait some time to do the next request
-    setTimeout(() => {
-      fetch('/api/logged-in-username')
-        .then(res => res.text())
-        .then(username => setUsername(username));
-    },100);
   }
 
   useEffect(() => {

@@ -8,6 +8,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 // core
 import { ProjectContext } from 'layouts/Project';
+import { Divider } from '@material-ui/core';
 
 export default function FormDialog(props) {
   // context
@@ -48,6 +49,7 @@ export default function FormDialog(props) {
     <div>
       <Dialog open={addUserOpen} onClose={handleClose}>
         <DialogTitle>Add User</DialogTitle>
+        <Divider variant="middle" />
         <DialogContent>
           <TextField
             autoFocus

@@ -15,3 +15,11 @@
 .ck-editor__editable {
   font-size: small;
 }
+
+.clickable:hover {
+  cursor: pointer;
+}
+
+.project-owner {
+  background-color: yellow !important;
+}
