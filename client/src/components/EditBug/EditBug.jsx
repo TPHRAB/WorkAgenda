@@ -25,8 +25,6 @@ import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
-import { createMuiTheme } from "@material-ui/core";
-import { ThemeProvider } from "@material-ui/styles";
 // utils
 import ReactHtmlParser from 'react-html-parser';
 import moment from 'moment';
@@ -93,17 +91,6 @@ const useStyles = makeStyles((theme) => ({
     padding: 0
   }
 }));
-
-const materialTheme = createMuiTheme({
-  overrides: {
-    MuiFormControl: {
-      marginNormal: {
-        marginTop: '0px',
-        paddingTop: '10.5px'
-      }
-    }
-  }
-});
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} timeout={150} />;
@@ -336,25 +323,23 @@ export default function EditBug(props) {
                 <TableRow>
                   <TableCell style={{width: 100}}>Due on</TableCell>
                   <TableCell style={{width: 250}}>
-                    <ThemeProvider theme={materialTheme}>
-                      <MuiPickersUtilsProvider utils={MomentUtils}>
-                        <KeyboardDatePicker
-                          disableToolbar
-                          autoOk
-                          variant="inline"
-                          format="MM-DD-YYYY"
-                          margin="normal"
-                          id="date-picker-inline"
-                          value={dueDate}
-                          onChange={setDueDate}
-                          KeyboardButtonProps={{
-                              'aria-label': 'change date',
-                            }}
-                          inputVariant="outlined"
-                          size="small"
-                        />
-                      </MuiPickersUtilsProvider>
-                    </ThemeProvider>
+                    <MuiPickersUtilsProvider utils={MomentUtils}>
+                      <KeyboardDatePicker
+                        disableToolbar
+                        autoOk
+                        variant="inline"
+                        format="MM-DD-YYYY"
+                        margin="normal"
+                        id="date-picker-inline"
+                        value={dueDate}
+                        onChange={setDueDate}
+                        KeyboardButtonProps={{
+                            'aria-label': 'change date',
+                          }}
+                        inputVariant="outlined"
+                        size="small"
+                      />
+                    </MuiPickersUtilsProvider>
                   </TableCell>
                   <TableCell style={{width: 50, border: 'none'}}></TableCell>
                   <TableCell style={{width: 100}}>Status</TableCell>

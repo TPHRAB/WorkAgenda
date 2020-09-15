@@ -6,6 +6,10 @@
   width: 50vw !important;
 }
 
-.title-field, .input-field, .center {
+.title-field, .input-field {
   text-align: center;
+}
+
+.full-width {
+  width: 100%;
 }

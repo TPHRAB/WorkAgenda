@@ -47,7 +47,7 @@ function createUpcomingWork(userIcon, title, type, message) {
 }
 
 export default function Dadhboard(props) {
-  const { pid, showPopupMessage } = useContext(ProjectContext);
+  const { pid, showPopupMessage, setProjectInfo } = useContext(ProjectContext);
 
   const classes = useStyles();
   const [description, setDescription] = useState('');

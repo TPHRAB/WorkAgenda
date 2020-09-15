@@ -11,7 +11,7 @@ const express = require('express'),
     updateLastOnlineDate } = require('./lib/user'),
   { createProject, getProjects, getProjectInfo,
     updateProjectInfo, addUserToProject,
-    getProjectUsers,
+    getProjectUsers, getProjectSettings,
     removeProjectUser} = require('./lib/project'),
   { createBug, getBugs, editBug, getBugInfo, deleteBug } = require('./lib/bug'),
   { commentBug, deleteComment } = require('./lib/comment');
@@ -236,6 +236,18 @@ app.get(API_URL + '/dashboard', async (req, res) => {
     let username = await checkLoggedin(req);
 
     let result = await getProjectInfo(username, req.query.pid);
+    res.json(result);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+app.get(API_URL + '/get-project-settings', async (req, res) => {
+  try {
+    let username = await checkLoggedin(req);
+
+    const { pid } = req.query;
+    let result = await getProjectSettings(username, pid);
     res.json(result);
   } catch (error) {
     handleError(error, res);
