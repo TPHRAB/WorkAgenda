@@ -84,7 +84,10 @@ export default function Dadhboard(props) {
           overview: tempOverview
         }
       })
-    });
+    })
+      .catch(error =>
+        showPopupMessage(error.message, 'danger')
+      );
   }
 
   React.useEffect(() => {
@@ -113,7 +116,10 @@ export default function Dadhboard(props) {
 
         // set bug status
         setBugStatus(json.bugStatus);
-      });
+      })
+      .catch(error => 
+        showPopupMessage(error.message, 'danger')
+      );
   }, []);
   return (
     <div>

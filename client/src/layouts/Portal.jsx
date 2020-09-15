@@ -87,7 +87,10 @@ export default function Portal({ history, ...rest }) {
           p['end_date'] = moment(p['end_date']).format('MM-DD-YYYY');
         });
         setRows(json);
-      });
+      })
+      .catch(error => 
+        setMessage(error.message)
+      );
   }, [])
 
   const handleClick = (pid) => {

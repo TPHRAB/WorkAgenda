@@ -33,7 +33,7 @@ const rows = [
 
 export default function BugReport(props) {
   // context
-  const { pid } = useContext(ProjectContext);
+  const { pid, showPopupMessage } = useContext(ProjectContext);
 
   // states
   const [createBugOpen, setCreateBugOpen] = useState(false);
@@ -59,7 +59,10 @@ export default function BugReport(props) {
           row['severity'] = severity[row['severity']];
         });
         setRows(obj);
-      });
+      })
+      .catch(error => 
+        showPopupMessage(error.message, 'danger')
+      );
   }, []);
 
   return (
