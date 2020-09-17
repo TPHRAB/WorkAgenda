@@ -1,4 +1,4 @@
-import React, { createContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
 // creates a beautiful scrollbar
 import PerfectScrollbar from "perfect-scrollbar";
@@ -10,7 +10,7 @@ import AddAlert from "@material-ui/icons/AddAlert";
 import Navbar from "components/Navbars/Navbar.js";
 import Footer from "components/Footer/Footer.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
-import Snackbar from "components/Snackbar/Snackbar.js";
+import { ProtectorContext } from 'utils/Protector';
 
 import { dashboardRoutes } from "routes.js";
 
@@ -43,16 +43,14 @@ const useStyles = makeStyles(styles);
 const ProjectContext = createContext();
 
 function Project(props) {
+  // context
+  const context = useContext(ProtectorContext);
   // styles
   const classes = useStyles();
   // ref to help us initialize PerfectScrollbar on windows devices
   const mainPanel = React.createRef();
   // states and functions
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [showMessage, setShowMessage] = React.useState(false);
-  const [message, setMessage] = React.useState('');
-  const [color, setColor] = React.useState('danger');
-  const [username, setUsername] = React.useState();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -61,15 +59,6 @@ function Project(props) {
     if (window.innerWidth >= 960) {
       setMobileOpen(false);
     }
-  };
-  const showPopupMessage = (message, color) => {
-    // close the popup message first and then reopen it up
-    setShowMessage(false);
-    setTimeout(() => {
-      setShowMessage(true);
-      setMessage(message);
-      setColor(color);
-    }, 100);
   };
 
   // initialize and destroy the PerfectScrollbar plugin
@@ -91,31 +80,13 @@ function Project(props) {
     };
   }, [mainPanel]);
 
-  useEffect(() => {
-    // get username
-    fetch('/api/logged-in-username')
-      .then(res => res.text())
-      .then(username => setUsername(username));
-  }, []);
-
   return (
-    <ProjectContext.Provider value={{ pid: props.match.params.pid, showPopupMessage, username }}>
+    <ProjectContext.Provider value={{ ...context, pid: props.match.params.pid }}>
       <div className={classes.wrapper}>
-        <div>
-          <Snackbar
-            place="br"
-            color={color}
-            icon={AddAlert}
-            message={message}
-            open={showMessage}
-            closeNotification={() => setShowMessage(false)}
-            close
-          />
-        </div>
         <Sidebar
           basePath={`/project/${props.match.params.pid}`}
           routes={dashboardRoutes}
-          logoText={"Creative Tim"}
+          logoText={"Work Agenda"}
           logo={logo}
           image={bgImage}
           handleDrawerToggle={handleDrawerToggle}

@@ -1,5 +1,4 @@
 DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS sessions;
 DROP TABLE IF EXISTS projects;
@@ -11,7 +10,7 @@ DROP TABLE IF EXISTS event;
 
 CREATE TABLE users (
     username varchar(255) NOT NULL,
-    password varchar(16) NOT NULL, -- AES-512 cipher text length
+    password varchar(16) NOT NULL, -- AES-256 cipher text length
     salt int NOT NULL,
     first_name TEXT DEFAULT '',
     last_name TEXT DEFAULT '',
@@ -77,4 +76,17 @@ CREATE TABLE events (
   start varchar(16), -- YYYY-MM-DD HH:mm
   end varchar(16), -- YYYY-MM-DD HH:mm
   FOREIGN KEY (pid) REFERENCES projects
+);
+
+CREATE TABLE messages (
+  mid INTEGER PRIMARY KEY AUTOINCREMENT,
+  message TEXT,
+  created_date varchar(16), -- YYYY-MM-DD HH:mm
+  status INTEGER DEFAULT 0, -- 0/1/2 (in progress, accepted, denied)
+  sender varchar(255),
+  receiver varchar(255),
+  pid INTEGER,
+  FOREIGN KEY (sender) REFERENCES users,
+  FOREIGN KEY (receiver) REFERENCES users,
+  FOREIGN KEY (pid) REFERENCES project
 );

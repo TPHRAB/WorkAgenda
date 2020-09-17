@@ -38,7 +38,8 @@ export default function FormDialog(props) {
       .then(res => {
         if (!res.ok)
           throw new Error('Cannot add user');
-        window.location.reload();
+        showPopupMessage('Inivitation send successful', 'success');
+        setAddUserOpen(false);
       })
       .catch(error => {
         showPopupMessage(error.message, 'danger');

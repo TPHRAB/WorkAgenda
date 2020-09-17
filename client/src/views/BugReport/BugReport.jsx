@@ -20,16 +20,42 @@ const headCells = [
   { id: 'severity', label: 'SEVERITY' },
 ];
 
+const dateCells = { created_date: 'cDate', due_date: 'dDate', default: 'due_date' };
+
 const status = ['OPEN', 'CLOSED'];
 const severity = ['NONE', 'MINOR', 'MAJOR', 'CRITICAL'];
 
-function createData(bug, reporter, createdDate, status, assignee, dueDate, severity) {
-  return { bug, reporter, createdDate, status, assignee, dueDate, severity };
+const createStatus = (code) => {
+  let color;
+  switch(code) {
+    case 0: // open
+      color = 'green';
+      break;
+    case 1: 
+      color = 'grey';
+      break;
+  }
+  return <span style={{color}}>{status[code]}</span>;
 }
 
-const rows = [
-  createData('This is a bugThis is a bugThis is a bugThis is a bugThis is a bug', 'Me', '08-15-2020', 'open', 'Me', <span style={{color: 'red'}}>08-18-2020 04:00 PM</span>, 'None'),
-];
+const createSeverity = (code) => {
+  let color;
+  switch(code) {
+    case 0: // None
+      color = 'grey';
+      break;
+    case 1: 
+      color = '#ff9999';
+      break;
+    case 2:
+      color = 'orange';
+      break;
+    case 3:
+      color = 'red';
+      break;
+  }
+  return <span style={{color}}>{severity[code]}</span>;
+}
 
 export default function BugReport(props) {
   // context
@@ -40,8 +66,10 @@ export default function BugReport(props) {
   const [editBugOpen, setEditBugOpen] = useState(false);
   const [rows, setRows] = useState([]);
   const [selectedBid, setSelectedBid] = useState();
-  // functions
+  const [openCount, setOpenCount] = useState(0);
+  const [closedCount, setClosedCount] = useState(0);
 
+  // functions
   const handleClick = (bid) => {
     setEditBugOpen(true);
     setSelectedBid(bid);
@@ -52,13 +80,26 @@ export default function BugReport(props) {
     fetch('/api/get-bugs?' + new URLSearchParams({ pid }))
       .then(res => res.json())
       .then(obj => {
+        let open = 0;
         obj.forEach(row => {
-          row['created_date'] = moment(row['created_date']).format('MM-DD-YYYY');
-          row['due_date'] = moment(row['due_date']).format('MM-DD-YYYY');
-          row['status'] = status[row['status']];
-          row['severity'] = severity[row['severity']];
+          if (row['severity'] === 0)
+            open++;
+          let createdDate = moment(row['created_date']);
+          row[dateCells['created_date']] = createdDate;
+          row['created_date'] = createdDate.format('MM-DD-YYYY');
+
+          let dueDate = moment(row['due_date']);
+          row[dateCells['due_date']] = dueDate;
+          row['due_date'] = dueDate.format('MM-DD-YYYY');
+
+          row['status'] = createStatus(row['status']);
+          row['severity'] = createSeverity(row['severity']);
         });
         setRows(obj);
+
+        // set message bar
+        setOpenCount(open);
+        setClosedCount(obj.length - open);
       })
       .catch(error => 
         showPopupMessage(error.message, 'danger')
@@ -77,12 +118,12 @@ export default function BugReport(props) {
             fontSize: '15px',
           }}
         >
-          <Chip label={<b style={{ color: 'green' }}>Open: 1</b>} onClick={() => {}} variant="outlined" style={{margin: '6px 5px 0px 10px'}}/>
-          <Chip label={<b style={{ color: 'grey' }}>Closed: 0</b>} onClick={() => {}} variant="outlined" style={{margin: '6px 5px 0px 10px'}}/>
+          <Chip label={<b style={{ color: 'green' }}>Open: {openCount}</b>} onClick={() => {}} variant="outlined" style={{margin: '6px 5px 0px 10px'}}/>
+          <Chip label={<b style={{ color: 'grey' }}>Closed: {closedCount}</b>} onClick={() => {}} variant="outlined" style={{margin: '6px 5px 0px 10px'}}/>
         </span>
         <Button type="button" color="info" onClick={() => setCreateBugOpen(true)}>Submit Bug</Button>
       </div>
-      <EnhancedTable headCells={headCells} rows={rows} idColumn='bid' handleClick={handleClick} />
+      <EnhancedTable headCells={headCells} rows={rows} idColumn='bid' handleClick={handleClick} dateCells={dateCells} />
     </>
   );
 }

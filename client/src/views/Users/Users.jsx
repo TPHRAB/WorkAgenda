@@ -80,7 +80,7 @@ export default function Users() {
             return (
               <GridItem key={user['username']} xs={12} sm={12} md={3}>
                 <Card
-                  onClick={username !== user['username'] && (() => selectUser(user))}
+                  onClick={username !== user['username'] ? (() => selectUser(user)) : null}
                   className={ username !== user['username'] ? "clickable" : "project-owner" }
                 >
                   <CardHeader color="warning" stats icon>

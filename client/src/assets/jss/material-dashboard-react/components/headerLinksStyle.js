@@ -107,6 +107,9 @@ const headerLinksStyle = theme => ({
       margin: "10px 15px 0"
     },
     display: "inline-block"
+  },
+  customTopLayer: {
+    zIndex: 1030
   }
 });
 

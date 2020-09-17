@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import classNames from "classnames";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
@@ -13,12 +13,9 @@ import Divider from "@material-ui/core/Divider";
 // @material-ui/icons
 import Person from "@material-ui/icons/Person";
 import Notifications from "@material-ui/icons/Notifications";
-import Dashboard from "@material-ui/icons/Dashboard";
-import Search from "@material-ui/icons/Search";
 // core components
-import CustomInput from "components/CustomInput/CustomInput.js";
 import Button from "components/CustomButtons/Button.js";
-
+import Message from 'components/Message/Message';
 import styles from "assets/jss/material-dashboard-react/components/headerLinksStyle.js";
 
 const useStyles = makeStyles(styles);
@@ -29,6 +26,9 @@ export default function AdminNavbarLinks() {
   // states
   const [openNotification, setOpenNotification] = React.useState(null);
   const [openProfile, setOpenProfile] = React.useState(null);
+  const [messages, setMessages] = React.useState([]);
+  const [showMessage, setShowMessage] = React.useState(false);
+  const [selectedItem, setSelectedItem]= React.useState({});
 
   // functions
   const handleClickNotification = event => {
@@ -51,43 +51,29 @@ export default function AdminNavbarLinks() {
   const handleCloseProfile = () => {
     setOpenProfile(null);
   };
+  const handleSelectMessage = (item) => {
+    setSelectedItem(item);
+    setShowMessage(true);
+    setOpenNotification(null);
+  }
+
   const logout = () => {
     fetch('/api/logout')
-      .then(res => {
+      .then(() => {
         window.location.reload()
       });
   }
 
+  // initialize
+  useEffect(() => {
+    fetch('/api/get-messages')
+      .then(res => res.json())
+      .then(json => setMessages(json))
+  }, []);
+
   return (
     <div>
-      <div className={classes.searchWrapper}>
-        <CustomInput
-          formControlProps={{
-            className: classes.margin + " " + classes.search
-          }}
-          inputProps={{
-            placeholder: "Search",
-            inputProps: {
-              "aria-label": "Search"
-            }
-          }}
-        />
-        <Button color="white" aria-label="edit" justIcon round>
-          <Search />
-        </Button>
-      </div>
-      <Button
-        color={window.innerWidth > 959 ? "transparent" : "white"}
-        justIcon={window.innerWidth > 959}
-        simple={!(window.innerWidth > 959)}
-        aria-label="Dashboard"
-        className={classes.buttonLink}
-      >
-        <Dashboard className={classes.icons} />
-        <Hidden mdUp implementation="css">
-          <p className={classes.linkText}>Dashboard</p>
-        </Hidden>
-      </Button>
+      <Message showMessage={showMessage} setShowMessage={setShowMessage} selectedItem={selectedItem} />
       <div className={classes.manager}>
         <Button
           color={window.innerWidth > 959 ? "transparent" : "white"}
@@ -99,7 +85,10 @@ export default function AdminNavbarLinks() {
           className={classes.buttonLink}
         >
           <Notifications className={classes.icons} />
-          <span className={classes.notifications}>5</span>
+          {
+            messages.length > 0 && 
+              <span className={classes.notifications}>{messages.length}</span>
+          }
           <Hidden mdUp implementation="css">
             <p onClick={handleCloseNotification} className={classes.linkText}>
               Notification
@@ -110,17 +99,12 @@ export default function AdminNavbarLinks() {
           open={Boolean(openNotification)}
           anchorEl={openNotification}
           transition
-          disablePortal
-          className={
-            classNames({ [classes.popperClose]: !openNotification }) +
-            " " +
-            classes.popperNav
-          }
+          className={classes.customTopLayer}
         >
           {({ TransitionProps, placement }) => (
             <Grow
               {...TransitionProps}
-              id="notification-menu-list-grow"
+              id="profile-menu-list-grow"
               style={{
                 transformOrigin:
                   placement === "bottom" ? "center top" : "center bottom"
@@ -129,36 +113,23 @@ export default function AdminNavbarLinks() {
               <Paper>
                 <ClickAwayListener onClickAway={handleCloseNotification}>
                   <MenuList role="menu">
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={classes.dropdownItem}
-                    >
-                      Mike John responded to your email
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={classes.dropdownItem}
-                    >
-                      You have 5 new tasks
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={classes.dropdownItem}
-                    >
-                      You{"'"}re now friend with Andrew
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={classes.dropdownItem}
-                    >
-                      Another Notification
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={classes.dropdownItem}
-                    >
-                      Another One
-                    </MenuItem>
+                    {
+                      messages.length > 0 ? messages.map(item => {
+                        return (
+                          <MenuItem
+                            onClick={() => handleSelectMessage(item)}
+                            className={classes.dropdownItem}
+                            key={item.mid}
+                          >
+                            {item.message}
+                          </MenuItem>
+                        )
+                      }) : (
+                        <MenuItem disabled>
+                          No messages
+                        </MenuItem>
+                      )
+                    }
                   </MenuList>
                 </ClickAwayListener>
               </Paper>

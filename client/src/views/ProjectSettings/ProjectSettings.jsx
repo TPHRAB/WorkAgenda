@@ -36,7 +36,7 @@ const useStyles = makeStyles({
 
 export default function ProjectSettings() {
   // context
-  const { pid, showPopupMessage, projectInfo } = useContext(ProjectContext);
+  const { pid, showPopupMessage, username } = useContext(ProjectContext);
   const classes = useStyles();
 
   // state
@@ -46,6 +46,7 @@ export default function ProjectSettings() {
   const [status, setStatus] = useState(0);
   const [start, setStart] = useState();
   const [end, setEnd] = useState();
+  const [disabled, setDisabled] = useState(true);
 
   // functions
   const saveChanges = () => {
@@ -102,12 +103,10 @@ export default function ProjectSettings() {
       .then(json => {
         json['start_date'] = moment(json['start_date']);
         json['end_date'] = moment(json['end_date']);
-        setName(json['name']);
-        setOwner(json['owner']);
-        setStatus(json['status']);
-        setStart(json['start_date']);
-        setEnd(json['end_date']);
+        setFields(json);
         setInitial(json);
+        if (json['owner'] === username)
+          setDisabled(false);
       })
       .catch(error => 
         showPopupMessage(error.message, 'danger')
@@ -130,6 +129,7 @@ export default function ProjectSettings() {
             </span>
             <span className="input-field">
               <TextField
+                disabled={disabled}
                 margin="dense"
                 variant="outlined"
                 value={name}
@@ -153,6 +153,7 @@ export default function ProjectSettings() {
             </span>
             <span className="input-field">
               <TextField
+                disabled={disabled}
                 value={owner}
                 className={classes.shortInput}
                 margin="dense"
@@ -178,6 +179,7 @@ export default function ProjectSettings() {
             <span className="input-field">
               <FormControl variant="outlined" size="small" className={classes.shortInput}>
                 <Select
+                  disabled={disabled}
                   value={status}
                   onChange={(event) => setStatus(event.target.value)}
                   inputProps={{
@@ -185,7 +187,7 @@ export default function ProjectSettings() {
                   }}
                 >
                   <MenuItem value={0}>Active</MenuItem>
-                  <MenuItem value={1}>Finished</MenuItem>
+                  <MenuItem value={1}>Completed</MenuItem>
                 </Select>
               </FormControl>
             </span>
@@ -204,6 +206,7 @@ export default function ProjectSettings() {
             <span className="input-field">
               <MuiPickersUtilsProvider utils={MomentUtils}>
                 <KeyboardDatePicker
+                  disabled={disabled}
                   className={classes.shortInput}
                   disableToolbar
                   autoOk
@@ -235,6 +238,7 @@ export default function ProjectSettings() {
             <span className="input-field">
               <MuiPickersUtilsProvider utils={MomentUtils}>
                 <KeyboardDatePicker
+                  disabled={disabled}
                   className={classes.shortInput}
                   disableToolbar
                   minDate={start}
@@ -256,10 +260,12 @@ export default function ProjectSettings() {
 
           <GridItem container justify='center' className='full-width'>
             <Button
+              disabled={disabled}
               color='success'
               className={classes.button}
               onClick={saveChanges}>Save</Button>
             <Button
+              disabled={disabled}
               color='warning'
               className={classes.button}
               onClick={restore}>Restore</Button>

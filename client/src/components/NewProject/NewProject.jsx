@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 // @material-ui
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -16,6 +16,7 @@ import { ThemeProvider } from "@material-ui/styles";
 // core
 import GridContainer from 'components/Grid/GridContainer';
 import GridItem from 'components/Grid/GridItem';
+import { ProtectorContext } from 'utils/Protector';
 // utils
 import moment from 'moment';
 import MomentUtils from "@date-io/moment";
@@ -42,7 +43,8 @@ const materialTheme = createMuiTheme({
 let overview = "";
 
 export default function NewProject(props) {
-  const { popupOpen, setPopupOpen, setMessage } = props
+  const { showPopupMessage } = useContext(ProtectorContext);
+  const { popupOpen, setPopupOpen } = props
   const { register, handleSubmit } = useForm();
 
   // states
@@ -73,7 +75,7 @@ export default function NewProject(props) {
       window.location.reload();
     })
     .catch(err => {
-      setMessage(err.message);
+      showPopupMessage(err.message, 'danger');
     });
   }
 

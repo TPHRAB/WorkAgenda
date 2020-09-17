@@ -10,11 +10,12 @@ const express = require('express'),
   { login, register, updateNotes,
     updateLastOnlineDate } = require('./lib/user'),
   { createProject, getProjects, getProjectInfo,
-    updateProjectInfo, addUserToProject,
-    getProjectUsers, getProjectSettings,
+    updateProjectInfo, getProjectUsers, getProjectSettings,
     removeProjectUser} = require('./lib/project'),
   { createBug, getBugs, editBug, getBugInfo, deleteBug } = require('./lib/bug'),
-  { commentBug, deleteComment } = require('./lib/comment');
+  { commentBug, deleteComment } = require('./lib/comment'),
+  { getMessages, createInvitation,
+    updateInvitation } = require('./lib/messages');
 
 // initialize server
 const PORT = process.env.port || 3001;
@@ -473,7 +474,7 @@ app.post(API_URL + '/add-user', async (req, res) => {
     let username = await checkLoggedin(req);
     
     const { pid, newUser } = req.body;
-    await addUserToProject(username, pid, newUser);
+    await createInvitation(username, newUser, pid);
     res.end();
   } catch (error) {
     handleError(error, res);
@@ -514,6 +515,43 @@ app.post(API_URL + '/remove-project-user', async (req, res) => {
 
     const { pid, userToRemove } = req.body;
     await removeProjectUser(username, pid, userToRemove);
+    res.end();
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+/**
+ * Usage: Get all invitations for the user
+ * Method: GET
+ * Params: none
+ * Return: 1. If success, return list in format
+ *              [{mid, message, created_date}, ...]
+ *         2. If failed, end with status code 401 with error message
+ */
+app.get(API_URL + '/get-messages', async (req, res) => {
+  try {
+    let username = await checkLoggedin(req);
+
+    let result = await getMessages(username);
+    res.json(result);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+/**
+ * Usage: Update the invitation's status
+ * Method: POST
+ * Params: mid - message id
+ *         status - status to update to (1/2 accepted, denied)
+ */
+app.post(API_URL + '/update-invitation', async (req, res) => {
+  try {
+    let username = await checkLoggedin(req);
+    const { mid, status } = req.body;
+
+    await updateInvitation(username, mid, status);
     res.end();
   } catch (error) {
     handleError(error, res);

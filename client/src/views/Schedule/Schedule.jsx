@@ -16,8 +16,6 @@ import 'assets/css/schedule.css'
 
 const localizer = momentLocalizer(moment)
 
-const now = new Date()
-
 export default function Schedule() {
   // context
   const { pid, showPopupMessage } = useContext(ProjectContext);
@@ -27,6 +25,7 @@ export default function Schedule() {
   const [showEvent, setShowEvent] = useState(false);
   const [events, setEvents] = useState([]);
   const [createEventOpen, setCreateEventOpen] = useState(false);
+  const [todayCount, setTodayCount] = useState(0);
 
   // functions
   const setOnShowEvent = (event) => {
@@ -44,11 +43,18 @@ export default function Schedule() {
       })
       .then(res => res.json())
       .then(events => {
+        let count = 0;
+        let today = moment();
         events.forEach(e => {
-          e['start'] = moment(e['start']).toDate();
-          e['end'] = moment(e['end']).toDate();
+          let start = moment(e['start']);
+          let end = moment(e['end']);
+          if (today.isSameOrAfter(start, 'day') && today.isSameOrBefore(end, 'day'))
+            count++;
+          e['start'] = start.toDate();
+          e['end'] = end.toDate();
         });
         setEvents(events);
+        setTodayCount(count);
       })
       .catch(error => {
         showPopupMessage(error.message, 'danger');
@@ -66,7 +72,7 @@ export default function Schedule() {
             fontSize: '15px',
           }}
         >
-          <Chip label={<b style={{ color: 'green' }}>Today's Event: 1</b>} onClick={() => {}} variant="outlined" style={{margin: '6px 5px 0px 10px'}}/>
+          <Chip label={<b style={{ color: 'green' }}>Today's Event: {todayCount}</b>} onClick={() => {}} variant="outlined" style={{margin: '6px 5px 0px 10px'}}/>
         </span>
         <Button type="button" color="info" onClick={() => setCreateEventOpen(true)}>Create Event</Button>
       </div>
