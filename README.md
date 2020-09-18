@@ -12,7 +12,7 @@ This project aims to practice the React framework, implementing user authenticat
 
 ## Usage
 
-The app allows you to manage projects and information related to the project such as bugs, working schedule, user participating the project.
+The app allows you to manage projects and related project such as bugs and working schedule.
 
 ## Requirements
 - [Node.js](https://expressjs.com/)
