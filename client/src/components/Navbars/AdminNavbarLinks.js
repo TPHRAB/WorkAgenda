@@ -66,10 +66,12 @@ export default function AdminNavbarLinks() {
 
   // initialize
   useEffect(() => {
-    fetch('/api/get-messages')
-      .then(res => res.json())
-      .then(json => setMessages(json))
-  }, []);
+    if (showMessage) {
+      fetch('/api/get-messages')
+        .then(res => res.json())
+        .then(json => setMessages(json))
+    }
+  }, [showMessage]);
 
   return (
     <div>
@@ -175,19 +177,6 @@ export default function AdminNavbarLinks() {
               <Paper>
                 <ClickAwayListener onClickAway={handleCloseProfile}>
                   <MenuList role="menu">
-                    <MenuItem
-                      onClick={handleCloseProfile}
-                      className={classes.dropdownItem}
-                    >
-                      Profile
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseProfile}
-                      className={classes.dropdownItem}
-                    >
-                      Settings
-                    </MenuItem>
-                    <Divider light />
                     <MenuItem
                       onClick={logout}
                       className={classes.dropdownItem}
