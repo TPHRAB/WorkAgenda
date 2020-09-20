@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS user_projects;
 DROP TABLE IF EXISTS bugs;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS events;
-DROP TABLE IF EXISTS event;
+DROP TABLE IF EXISTS messages;
 
 CREATE TABLE users (
     username varchar(255) NOT NULL,

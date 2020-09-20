@@ -70,6 +70,7 @@ export default function Tasks(props) {
                       id="outlined-basic"
                       variant="outlined"
                       defaultValue={value}
+                      fullWidth
                       onChange={(event) => {
                         editField = event.target.value
                       }}
@@ -141,14 +142,16 @@ export default function Tasks(props) {
           ))}
         </TableBody>
       </Table>
-      <Button
-        type="button"
-        color="success"
-        className={classes.button}
-        onClick={add}
-      >
-          <AddIcon />Add
-      </Button>
+      <span className={classes.buttonWrapper}>
+        <Button
+          type="button"
+          color="success"
+          className={classes.button}
+          onClick={add}
+        >
+            <AddIcon />Add
+        </Button>
+      </span>
     </>
   );
 }

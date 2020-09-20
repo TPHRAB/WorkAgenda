@@ -212,16 +212,6 @@ export default function Dadhboard(props) {
         </GridItem>
       </GridContainer>
       <GridContainer>
-        <GridItem xs={12} sm={12} md={3}>
-          <Card>
-            <CardHeader color="rose">
-              <h4 className={classes.cardTitleWhite}><b>Schedule</b></h4>
-            </CardHeader>
-            <CardBody id="card-header">
-               // calender for this month
-            </CardBody>
-          </Card>
-        </GridItem>
         <GridItem xs={12} sm={12} md={6}>
           <Card>
             <CardHeader color="primary">
@@ -232,7 +222,7 @@ export default function Dadhboard(props) {
             </CardBody>
           </Card>
         </GridItem>
-        <GridItem xs={12} sm={12} md={3}>
+        <GridItem xs={12} sm={12} md={6}>
           <Card>
             <CardHeader color="success">
               <h4 className={classes.cardTitleWhite}><b>Notes</b></h4>

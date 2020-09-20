@@ -6,6 +6,7 @@ import {
 } from "assets/jss/material-dashboard-react.js";
 import tooltipStyle from "assets/jss/material-dashboard-react/tooltipStyle.js";
 import checkboxAdnRadioStyle from "assets/jss/material-dashboard-react/checkboxAdnRadioStyle.js";
+import { CenterFocusStrong } from "@material-ui/icons";
 const tasksStyle = {
   ...tooltipStyle,
   ...checkboxAdnRadioStyle,
@@ -53,8 +54,14 @@ const tasksStyle = {
     color: dangerColor[0],
     boxShadow: "none"
   },
+  buttonWrapper: {
+    display: 'block',
+    width: '100%',
+    textAlign: 'center'
+  },
   button: {
-    width: '100%'
+    width: '20%',
+    height: '80%'
   }
 };
 export default tasksStyle;
